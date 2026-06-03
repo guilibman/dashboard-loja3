@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos ERP — Loja 3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f4;color:#1a1a18;font-size:14px}
+.wrap{max-width:1100px;margin:0 auto;padding:24px 20px}
+.header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e4e0}
+.header h1{font-size:18px;font-weight:600}
+.header p{font-size:12px;color:#888780}
+.badge-periodo{background:#1a1a18;color:#fff;font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;white-space:nowrap}
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px}
+.mc{background:#fff;border:1px solid #e5e4e0;border-radius:8px;padding:14px 16px}
+.ml{font-size:11px;color:#888780;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.mv{font-size:24px;font-weight:600}
+.ms{font-size:11px;color:#aaa;margin-top:3px}
+.vd{color:#a32d2d}.vw{color:#854f0b}.vo{color:#27500a}
+.hr{height:1px;background:#e5e4e0;margin:20px 0}
+.tabs{display:flex;border-bottom:1px solid #e5e4e0;margin-bottom:16px;overflow-x:auto}
+.tab{font-size:13px;padding:8px 16px;cursor:pointer;color:#888780;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.tab:hover{color:#1a1a18}
+.tab.on{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
+.tp{display:none}.tp.on{display:block}
+.fr{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.fr label{font-size:13px;color:#888780}
+.fr select{font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;cursor:pointer}
+.fr select:focus{outline:none;border-color:#888}
+.tw{overflow-x:auto;border:1px solid #e5e4e0;border-radius:8px}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{font-size:11px;font-weight:500;color:#888780;text-align:left;padding:8px 10px;border-bottom:1px solid #e5e4e0;background:#fafaf8;white-space:nowrap}
+td{padding:8px 10px;border-bottom:1px solid #f0efe8;color:#1a1a18;vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#fafaf8}
+.b{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.bok{background:#eaf3de;color:#27500a}.bwn{background:#faeeda;color:#633806}.bdg{background:#fcebeb;color:#791f1f}
+.bif{background:#e6f1fb;color:#0c447c}.bnt{background:#f1efe8;color:#5f5e5a}.bpp{background:#eeedfe;color:#3c3489}
+.alr td:first-child{border-left:3px solid #e24b4a}
+.card{background:#fff;border:1px solid #e5e4e0;border-radius:8px;padding:16px 18px;margin-bottom:12px}
+.sl{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:#888780;margin-bottom:10px}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0efe8;font-size:13px}
+.rrow:last-child{border-bottom:none}
+.note{background:#e6f1fb;border-radius:6px;padding:10px 14px;font-size:12px;color:#0c447c;margin-bottom:14px;border:1px solid #b5d4f4;line-height:1.5}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.upload-zone{background:#fff;border:2px dashed #d3d1c7;border-radius:8px;padding:28px;text-align:center;margin-bottom:20px;cursor:pointer;transition:border-color .15s}
+.upload-zone:hover{border-color:#888}
+.upload-zone p{font-size:14px;color:#5f5e5a;margin-bottom:4px}
+.upload-zone span{font-size:12px;color:#aaa}
+.empty{text-align:center;padding:24px;font-size:13px;color:#aaa}
+.ts{font-size:11px;color:#aaa;margin-top:16px;text-align:right}
+@media(max-width:600px){.two{grid-template-columns:1fr}.mg{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div>
+    <h1>Pedidos ERP — Loja 3</h1>
+    <p id="subtitle">Faça upload do CSV/Excel exportado do Millennium para carregar os dados</p>
+  </div>
+  <span class="badge-periodo" id="periodo">Sem dados</span>
+</div>
+
+<div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+  <p>Arraste o arquivo exportado do Millennium aqui</p>
+  <span>CSV ou Excel (.xlsx) — ou clique para selecionar</span>
+  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(event)">
+</div>
+
+<div id="dash" style="display:none">
+<div class="mg" id="metricsRow"></div>
+<div class="hr"></div>
+<div class="tabs">
+  <button class="tab on" onclick="sw('fila')">Fila pendente</button>
+  <button class="tab" onclick="sw('lojas')">Performance lojas</button>
+  <button class="tab" onclick="sw('ruptura')">Ruptura</button>
+</div>
+
+<div class="tp on" id="tp-fila">
+  <div class="fr">
+    <label>Loja</label><select id="fL" onchange="rF()"><option value="">Todas</option></select>
+    <label>Status</label><select id="fS" onchange="rF()"><option value="">Todos</option></select>
+    <label>Aging</label>
+    <select id="fA" onchange="rF()">
+      <option value="">Todos</option>
+      <option value="c">Crítico (&gt;7d)</option>
+      <option value="a">Alerta (3–7d)</option>
+      <option value="o">OK (&lt;3d)</option>
+    </select>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Pedido</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Emissão</th><th>Prazo entrega</th><th>Aging</th><th>Situação</th></tr></thead>
+    <tbody id="ftb"></tbody>
+  </table></div>
+  <div id="fem" class="empty" style="display:none">Sem pedidos com estes filtros.</div>
+</div>
+
+<div class="tp" id="tp-lojas">
+  <div class="tw"><table>
+    <thead><tr><th>Loja</th><th>Total</th><th>Faturados</th><th>Pendentes</th><th>Cancelados</th><th>Tempo médio fat.</th><th>Realoc. recebidos</th><th>Desempenho</th></tr></thead>
+    <tbody id="ltb"></tbody>
+  </table></div>
+</div>
+
+<div class="tp" id="tp-ruptura">
+  <div class="note" id="ruptNote" style="display:none"></div>
+  <div class="two">
+    <div class="card">
+      <div class="sl">Ruptura por loja de origem</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:10px">Pedidos VTX que geraram ao menos 1 realocado (000...)</p>
+      <div id="ruptList"></div>
+    </div>
+    <div class="card">
+      <div class="sl">Destino dos realocados</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:10px">Lojas que faturaram pedidos realocados</p>
+      <div id="destList"></div>
+    </div>
+  </div>
+  <div class="card" id="realCard" style="display:none">
+    <div class="sl">Realocados ainda pendentes</div>
+    <div class="tw"><table>
+      <thead><tr><th>Pedido</th><th>Loja faturante</th><th>Status</th><th>Ref. original (Pedido Marketplace)</th><th>Aging</th></tr></thead>
+      <tbody id="rtb"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<p class="ts" id="ts"></p>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+let DATA = [], HOJE = new Date();
+
+// Status faturado: inclui AG. CONFIRMAÇÃO DE ENTREGA
+const STATUS_FAT_KEYS = ['ENTREGUE','AGEMBARQUE','AGCONFIRMACAODEENTREGA','AGCONFIRMACAO'];
+
+function normStatus(s) {
+  return String(s||'').toUpperCase()
+    .replace(/[ÀÁÂÃÄ]/g,'A').replace(/[ÇĆČ]/g,'C').replace(/[ÈÉÊË]/g,'E')
+    .replace(/[ÌÍÎÏ]/g,'I').replace(/[ÒÓÔÕÖ]/g,'O').replace(/[ÙÚÛÜ]/g,'U')
+    .replace(/[^A-Z0-9]/g,'');
+}
+function isFat(s){ return STATUS_FAT_KEYS.includes(normStatus(s)); }
+function isCan(c){ return String(c||'').toUpperCase().includes('CANCELADO TOTAL'); }
+function isRupt(o){ return String(o||'').toLowerCase().includes('processo automatico de divergencia'); }
+
+function normLoja(s) {
+  s = String(s||'').trim().toUpperCase();
+  if(!s || s==='NAN') return 'CD BENFICA';
+  s = s.replace(/^E-COMMERCE\s*/,'').trim();
+  return s || 'CD BENFICA';
+}
+
+function toDate(v) {
+  if(!v || v==='') return null;
+  if(v instanceof Date) return isNaN(v)?null:v;
+  if(typeof v==='string'){
+    const m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})$/);
+    if(m) return new Date(+m[3],+m[2]-1,+m[1]);
+    const d=new Date(v); if(!isNaN(d)) return d;
+  }
+  if(typeof v==='number' && v>40000) return new Date(Date.UTC(1899,11,30)+v*86400000);
+  return null;
+}
+
+function fmtD(d){ return d?d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'}):'—'; }
+function fmtS(d){ return d?d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit'}):'—'; }
+function agDias(d){ return d?Math.round((HOJE-d)/86400000):null; }
+
+function extractCore(mkt) {
+  if(!mkt) return null;
+  const m=String(mkt).match(/(\d{10,})/);
+  return m?m[1].slice(-7):null;
+}
+function vtxNum(p){
+  const m=String(p).match(/VTX-(\d+)-/);
+  return m?m[1]:null;
+}
+
+function processData(rows) {
+  HOJE = new Date(); HOJE.setHours(0,0,0,0);
+
+  // Filtrar OMNI e ENCOMENDA
+  rows = rows.filter(r => {
+    const desc = String(r['Desc Tipo Pedido']||r['desc_tipo_pedido']||'').toUpperCase();
+    const ped  = String(r['Pedido']||r['pedido']||'').toUpperCase();
+    return !desc.includes('ENCOMENDA') && !ped.startsWith('OMNI');
+  });
+
+  DATA = rows.filter(r => String(r['Pedido']||r['pedido']||'').trim().length > 3).map(r => {
+    const pedido   = String(r['Pedido']||r['pedido']||'').trim();
+    const status   = String(r['Status Workflow']||r['status']||'').trim();
+    const cancelado= r['Cancelado']||r['cancelado']||'';
+    const obs      = r['Obs']||r['obs']||'';
+    const mkt      = String(r['Pedido Marketplace']||r['pedido_marketplace']||'').trim();
+    const dtE      = toDate(r['Data de Emissão']||r['Data de Emissao']||r['emissao']);
+    const dtN      = toDate(r['Nf Data']||r['nf_data']||r['Nf data']);
+    const dtD      = toDate(r['Data de Entrega']||r['data_entrega']);
+    const tipo     = pedido.startsWith('VTX')?'VTX':'REALOCADO';
+    const fat      = isFat(status);
+    const can      = isCan(cancelado);
+    const rupt     = isRupt(obs);
+    const diasFat  = (fat && dtE && dtN) ? Math.round((dtN-dtE)/86400000) : null;
+    const aging    = (!fat && !can && dtE) ? agDias(dtE) : null;
+    return { pedido, tipo, loja:normLoja(r['Desc Tipo Pedido']||r['desc_tipo_pedido']||''),
+             status, fat, can, rupt, mkt, dtE, dtN, dtD, diasFat, aging,
+             vtxNum: vtxNum(pedido), mktCore: extractCore(mkt) };
+  });
+
+  renderAll();
+}
+
+function renderAll() {
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('dash').style.display='block';
+
+  const total=DATA.length, fat=DATA.filter(d=>d.fat).length;
+  const pend=DATA.filter(d=>!d.fat&&!d.can).length, can=DATA.filter(d=>d.can).length;
+  const rupt=DATA.filter(d=>d.rupt).length;
+  const crit=DATA.filter(d=>d.aging!==null&&d.aging>7).length;
+  const alrt=DATA.filter(d=>d.aging!==null&&d.aging>=3&&d.aging<=7).length;
+  const vtxC=DATA.filter(d=>d.tipo==='VTX').length, realC=DATA.filter(d=>d.tipo==='REALOCADO').length;
+
+  document.getElementById('metricsRow').innerHTML=`
+    <div class="mc"><div class="ml">Total</div><div class="mv">${total.toLocaleString('pt-BR')}</div><div class="ms">${vtxC} VTX · ${realC} realoc.</div></div>
+    <div class="mc"><div class="ml">Faturados</div><div class="mv vo">${fat.toLocaleString('pt-BR')}</div><div class="ms">${total?Math.round(fat/total*100):0}% do total</div></div>
+    <div class="mc"><div class="ml">Pendentes</div><div class="mv vw">${pend}</div><div class="ms">não faturados</div></div>
+    <div class="mc"><div class="ml">Cancelados</div><div class="mv">${can}</div><div class="ms">${total?Math.round(can/total*100):0}%</div></div>
+    <div class="mc"><div class="ml">Críticos &gt;7d</div><div class="mv vd">${crit}</div><div class="ms">parados há +7 dias</div></div>
+    <div class="mc"><div class="ml">Alerta 3–7d</div><div class="mv vw">${alrt}</div><div class="ms">atenção nos prox. dias</div></div>
+    <div class="mc"><div class="ml">Ruptura</div><div class="mv">${rupt}</div><div class="ms">realocados gerados</div></div>`;
+
+  const datas=DATA.filter(d=>d.dtE).map(d=>d.dtE);
+  if(datas.length){
+    const mn=new Date(Math.min(...datas)), mx=new Date(Math.max(...datas));
+    document.getElementById('periodo').textContent=fmtS(mn)+' – '+fmtD(mx);
+    document.getElementById('subtitle').textContent=`${total.toLocaleString('pt-BR')} pedidos carregados · Millennium ERP`;
+  }
+
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const fl=document.getElementById('fL'); fl.innerHTML='<option value="">Todas</option>';
+  lojas.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;fl.appendChild(o);});
+  const sts=[...new Set(DATA.filter(d=>!d.fat&&!d.can).map(d=>d.status))].sort();
+  const fs=document.getElementById('fS'); fs.innerHTML='<option value="">Todos</option>';
+  sts.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fs.appendChild(o);});
+
+  rF(); rLojas(); rRuptura();
+  document.getElementById('ts').textContent='Processado em: '+new Date().toLocaleString('pt-BR');
+}
+
+function sb(s){
+  const u=normStatus(s);
+  if(u.includes('FATURAMENTO'))return'<span class="b bwn">Ag. Fat.</span>';
+  if(u.includes('CONFIRMACAO'))return'<span class="b bif">Ag. Conf.</span>';
+  if(u.includes('APROVACAO'))return'<span class="b bpp">Ag. Aprov.</span>';
+  if(u.includes('EMBARQUE'))return'<span class="b bok">Ag. Embarque</span>';
+  if(u==='ENTREGUE')return'<span class="b bok">Entregue</span>';
+  return`<span class="b bnt">${s}</span>`;
+}
+function ac(a){return a>7?'bdg':a>=3?'bwn':'bok';}
+function asSit(a){return a>7?'<span class="b bdg">Crítico</span>':a>=3?'<span class="b bwn">Alerta</span>':'<span class="b bok">Normal</span>';}
+
+function rF(){
+  const lv=document.getElementById('fL').value, sv=document.getElementById('fS').value, av=document.getElementById('fA').value;
+  let rows=DATA.filter(d=>!d.fat&&!d.can);
+  if(lv) rows=rows.filter(d=>d.loja===lv);
+  if(sv) rows=rows.filter(d=>d.status===sv);
+  if(av==='c') rows=rows.filter(d=>d.aging>7);
+  else if(av==='a') rows=rows.filter(d=>d.aging>=3&&d.aging<=7);
+  else if(av==='o') rows=rows.filter(d=>d.aging!==null&&d.aging<3);
+  rows.sort((a,b)=>(b.aging||0)-(a.aging||0));
+  const tb=document.getElementById('ftb'), em=document.getElementById('fem');
+  if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tb.innerHTML=rows.map(r=>`<tr class="${(r.aging||0)>7?'alr':''}">
+    <td style="font-weight:500;font-size:11px">${r.pedido}</td>
+    <td>${r.tipo==='REALOCADO'?'<span class="b bpp">Realocado</span>':'<span class="b bnt">VTX</span>'}</td>
+    <td>${r.loja}</td><td>${sb(r.status)}</td>
+    <td style="color:#888780">${fmtD(r.dtE)}</td>
+    <td style="color:#888780">${fmtD(r.dtD)}</td>
+    <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?r.aging+'d':'—'}</span></td>
+    <td>${asSit(r.aging||0)}</td></tr>`).join('');
+}
+
+function rLojas(){
+  const ruptCores=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const mds=lojas.map(l=>{const v=DATA.filter(d=>d.loja===l&&d.diasFat!==null);return v.length?v.reduce((s,d)=>s+d.diasFat,0)/v.length:null;});
+  const validMds=mds.filter(x=>x!==null);
+  const mx=validMds.length?Math.max(...validMds):0, mn=validMds.length?Math.min(...validMds):0;
+  document.getElementById('ltb').innerHTML=lojas.map((l,i)=>{
+    const g=DATA.filter(d=>d.loja===l);
+    const fat=g.filter(d=>d.fat).length, pen=g.filter(d=>!d.fat&&!d.can).length, can=g.filter(d=>d.can).length;
+    const pct=Math.round(fat/g.length*100);
+    const md=mds[i], mdStr=md!==null?md.toFixed(1)+'d':'—';
+    const re=g.filter(d=>d.rupt).length;
+    const pc=pct>=93?'bok':pct>=85?'bwn':'bdg', lb=pct>=93?'Bom':pct>=85?'Regular':'Atenção';
+    const sp=md!==null&&md===mn?' <span class="b bok">Mais rápida</span>':md!==null&&md===mx?' <span class="b bdg">Mais lenta</span>':'';
+    return`<tr><td style="font-weight:500">${l}</td><td>${g.length}</td>
+      <td>${fat} <span style="font-size:11px;color:#aaa">(${pct}%)</span></td>
+      <td>${pen}</td><td>${can}</td><td>${mdStr}${sp}</td><td>${re}</td>
+      <td><span class="b ${pc}">${lb}</span></td></tr>`;
+  }).join('');
+}
+
+function rRuptura(){
+  const ruptCores=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
+  const vtxData=DATA.filter(d=>d.tipo==='VTX');
+  const lojas=[...new Set(vtxData.map(d=>d.loja))].sort();
+
+  // Ruptura por loja de origem
+  const ruptByLoja=lojas.map(l=>{
+    const g=vtxData.filter(d=>d.loja===l);
+    const cr=g.filter(d=>ruptCores.has(d.vtxNum)).length;
+    return{l,tot:g.length,cr,pct:Math.round(cr/g.length*100)};
+  }).filter(x=>x.cr>0).sort((a,b)=>b.pct-a.pct);
+
+  // Unmatched: realocados cujo VTX original não está na planilha
+  const matchedCores=new Set(vtxData.map(d=>d.vtxNum).filter(Boolean));
+  const unmatchedCount=[...ruptCores].filter(c=>!matchedCores.has(c)).length;
+  if(unmatchedCount>0){
+    const n=document.getElementById('ruptNote');
+    n.style.display='block';
+    n.innerHTML=`<strong>${unmatchedCount} pedidos VTX originadores</strong> estão fora da janela desta exportação (todos E-COMMERCE / CD BENFICA). Numa exportação com janela maior esse mapeamento ficará completo.`;
+  }
+
+  const rl=document.getElementById('ruptList');
+  if(!ruptByLoja.length&&unmatchedCount===0){rl.innerHTML='<p style="font-size:13px;color:#aaa;text-align:center;padding:16px">Nenhuma ruptura identificada.</p>';return;}
+  const maxPct=ruptByLoja.length?ruptByLoja[0].pct:10;
+  rl.innerHTML=ruptByLoja.map(x=>{
+    const color=x.pct>=15?'#e24b4a':x.pct>=8?'#ba7517':'#639922';
+    return`<div class="rrow"><span>${x.l}</span>
+      <span style="display:flex;align-items:center;gap:8px">
+        <span style="width:90px;height:5px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.pct/maxPct*100,100)}%;background:${color};border-radius:99px"></span></span>
+        <span style="font-weight:500;color:${color};min-width:36px;text-align:right">${x.pct}%</span>
+        <span style="font-size:11px;color:#aaa">(${x.cr}/${x.tot})</span>
+      </span></div>`;
+  }).join('')+(unmatchedCount>0?`<div style="margin-top:10px;padding-top:10px;border-top:1px solid #f0efe8;font-size:12px;color:#888780">+${unmatchedCount} pedidos origem fora do período (CD BENFICA)</div>`:'');
+
+  // Destino realocados
+  const dest={};
+  DATA.filter(d=>d.rupt).forEach(d=>{dest[d.loja]=(dest[d.loja]||0)+1;});
+  const destArr=Object.entries(dest).sort((a,b)=>b[1]-a[1]);
+  const dtot=destArr.reduce((s,x)=>s+x[1],0);
+  document.getElementById('destList').innerHTML=destArr.map(([l,v])=>`<div class="rrow"><span>${l}</span>
+    <span style="display:flex;align-items:center;gap:8px">
+      <span style="width:90px;height:5px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.round(v/dtot*100)}%;background:#185fa5;border-radius:99px"></span></span>
+      <span style="font-weight:500">${v}</span>
+    </span></div>`).join('');
+
+  // Realocados pendentes
+  const pendReal=DATA.filter(d=>d.tipo==='REALOCADO'&&d.rupt&&!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
+  if(pendReal.length){
+    document.getElementById('realCard').style.display='block';
+    document.getElementById('rtb').innerHTML=pendReal.map(r=>`<tr class="${(r.aging||0)>7?'alr':''}">
+      <td style="font-weight:500;font-size:11px">${r.pedido}</td><td>${r.loja}</td><td>${sb(r.status)}</td>
+      <td style="font-size:11px;color:#888780">${r.mkt||'—'}</td>
+      <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?r.aging+'d':'—'}</span></td></tr>`).join('');
+  }
+}
+
+function sw(n){
+  const ns=['fila','lojas','ruptura'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ns[i]===n));
+  ns.forEach(x=>document.getElementById('tp-'+x).classList.toggle('on',x===n));
+}
+
+function handleFile(e){
+  const file=e.target.files[0]; if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){
+    Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>processData(r.data)});
+  } else {
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const wb=XLSX.read(ev.target.result,{type:'array',cellDates:true});
+      processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false}));
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+const zone=document.getElementById('uploadZone');
+zone.addEventListener('dragover',e=>{e.preventDefault();zone.style.borderColor='#1a1a18';});
+zone.addEventListener('dragleave',()=>zone.style.borderColor='#d3d1c7');
+zone.addEventListener('drop',e=>{
+  e.preventDefault();zone.style.borderColor='#d3d1c7';
+  if(e.dataTransfer.files[0]) handleFile({target:{files:e.dataTransfer.files}});
+});
+</script>
+</body>
+</html>

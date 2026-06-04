@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pedidos ERP — Loja 3</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f8f7f4;color:#1a1a18;font-size:14px}
+.wrap{max-width:1200px;margin:0 auto;padding:24px 20px}
+.header{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;margin-bottom:20px;padding-bottom:16px;border-bottom:1px solid #e5e4e0}
+.header h1{font-size:18px;font-weight:600}
+.header-right{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge-periodo{background:#1a1a18;color:#fff;font-size:11px;padding:3px 10px;border-radius:99px;font-weight:500;white-space:nowrap}
+.btn-sm{font-size:11px;padding:3px 10px;border-radius:99px;border:1px solid #d3d1c7;background:#fff;color:#888780;cursor:pointer}
+.btn-sm:hover{border-color:#888;color:#1a1a18}
+.mg{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:24px}
+.mc{background:#fff;border:1px solid #e5e4e0;border-radius:8px;padding:14px 16px}
+.mc.mc-crit{border-color:#f5c6c6;background:#fffafa}
+.mc.mc-alrt{border-color:#f5dfa6;background:#fffdf5}
+.ml{font-size:11px;color:#888780;margin-bottom:4px;text-transform:uppercase;letter-spacing:.04em}
+.mv{font-size:24px;font-weight:600}
+.ms{font-size:11px;color:#aaa;margin-top:3px}
+.vw{color:#854f0b}.vo{color:#27500a}
+.mc-crit .ml,.mc-crit .mv{color:#a32d2d}
+.mc-alrt .ml,.mc-alrt .mv{color:#854f0b}
+.hr{height:1px;background:#e5e4e0;margin:20px 0}
+.tabs{display:flex;border-bottom:1px solid #e5e4e0;margin-bottom:16px;overflow-x:auto}
+.tab{font-size:13px;padding:8px 16px;cursor:pointer;color:#888780;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;background:none;border-top:none;border-left:none;border-right:none}
+.tab:hover{color:#1a1a18}
+.tab.on{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
+.tp{display:none}.tp.on{display:block}
+.fr{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.fr label{font-size:13px;color:#888780}
+.fr select{font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;cursor:pointer}
+.tw{overflow-x:auto;border:1px solid #e5e4e0;border-radius:8px}
+table{width:100%;font-size:12px;border-collapse:collapse}
+th{font-size:11px;font-weight:500;color:#888780;text-align:left;padding:8px 10px;border-bottom:1px solid #e5e4e0;background:#fafaf8;white-space:nowrap;cursor:pointer}
+th:hover{color:#1a1a18}
+th.sa::after{content:" ↑";opacity:.5}th.sd::after{content:" ↓";opacity:.5}
+td{padding:7px 10px;border-bottom:1px solid #f0efe8;color:#1a1a18;vertical-align:middle}
+tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
+.b{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap}
+.bok{background:#eaf3de;color:#27500a}.bwn{background:#faeeda;color:#633806}.bdg{background:#fcebeb;color:#791f1f}
+.bif{background:#e6f1fb;color:#0c447c}.bnt{background:#f1efe8;color:#5f5e5a}.bpp{background:#eeedfe;color:#3c3489}
+.alr td:first-child{border-left:3px solid #e24b4a}
+.card{background:#fff;border:1px solid #e5e4e0;border-radius:8px;padding:16px 18px;margin-bottom:12px}
+.sl{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:#888780;margin-bottom:10px}
+.rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0efe8;font-size:13px}
+.rrow:last-child{border-bottom:none}
+.note{background:#e6f1fb;border-radius:6px;padding:10px 14px;font-size:12px;color:#0c447c;margin-bottom:14px;border:1px solid #b5d4f4;line-height:1.5}
+.pend-layout{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.upload-zone{background:#fff;border:2px dashed #d3d1c7;border-radius:8px;padding:32px;text-align:center;margin-bottom:20px;cursor:pointer;transition:border-color .15s}
+.upload-zone:hover,.upload-zone.drag{border-color:#1a1a18}
+.upload-zone p{font-size:14px;color:#5f5e5a;margin-bottom:4px}
+.upload-zone span{font-size:12px;color:#aaa}
+.saved-banner{background:#eaf3de;border:1px solid #c2dba1;border-radius:6px;padding:8px 14px;font-size:12px;color:#27500a;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.td-h{font-weight:700;font-size:13px}.td-fast{color:#27500a}.td-slow{color:#a32d2d}
+.pct-fat{font-weight:700;font-size:13px}
+.af-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:12px}
+.lbtn{font-size:10px;padding:2px 7px;border-radius:99px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.empty{text-align:center;padding:24px;font-size:13px;color:#aaa}
+.ts{font-size:11px;color:#aaa;margin-top:16px;text-align:right}
+@media(max-width:600px){.pend-layout{flex-direction:column}.mg{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="header">
+  <div>
+    <h1>Pedidos ERP — Loja 3</h1>
+    <p style="font-size:12px;color:#888780;margin-top:2px" id="subtitle">Faça upload do CSV/Excel exportado do Millennium</p>
+  </div>
+  <div class="header-right">
+    <span class="badge-periodo" id="periodo">Sem dados</span>
+    <button class="btn-sm" id="btnClear" style="display:none" onclick="clearData()">Limpar dados</button>
+  </div>
+</div>
+
+<div id="savedBanner" class="saved-banner" style="display:none">
+  <span id="savedMsg"></span>
+  <button class="btn-sm" onclick="document.getElementById('fileInput').click()" style="cursor:pointer">Atualizar arquivo</button>
+</div>
+
+<label class="upload-zone" id="uploadZone" for="fileInput" style="display:block;cursor:pointer">
+  <p>Arraste o arquivo exportado do Millennium aqui</p>
+  <span>CSV ou Excel (.xlsx) — ou clique para selecionar</span>
+</label>
+<input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none;position:absolute;left:-9999px" onchange="handleFile(event)">
+
+<div id="dash" style="display:none">
+<div class="mg" id="metricsRow"></div>
+<div class="hr"></div>
+<div class="tabs">
+  <button class="tab on" onclick="sw('lojas')">Performance lojas</button>
+  <button class="tab" onclick="sw('fila')">Fila a faturar</button>
+  <button class="tab" onclick="sw('pend')">Pendência</button>
+</div>
+
+<div class="tp on" id="tp-lojas">
+  <p style="font-size:12px;color:#888780;margin-bottom:10px">Ordenado por tempo médio de faturamento. Clique em qualquer coluna para reordenar.</p>
+  <div class="tw"><table id="ltable">
+    <thead><tr>
+      <th onclick="sL('loja')">Loja</th>
+      <th onclick="sL('total')">Total</th>
+      <th onclick="sL('pct_fat')" class="sa">Faturados</th>
+      <th onclick="sL('a_faturar')">A faturar</th>
+      <th onclick="sL('cancelados')">Cancelados</th>
+      <th onclick="sL('media_h')">Tempo médio fat.</th>
+      <th onclick="sL('pct_pend')">% Pendência</th>
+      <th>Desempenho</th>
+    </tr></thead>
+    <tbody id="ltb"></tbody>
+  </table></div>
+</div>
+
+<div class="tp" id="tp-fila">
+  <div class="fr">
+    <label>Loja</label><select id="fL" onchange="rF()"><option value="">Todas</option></select>
+    <label>Status</label><select id="fS" onchange="rF()"><option value="">Todos</option></select>
+    <label>Aging</label>
+    <select id="fA" onchange="rF()">
+      <option value="">Todos</option>
+      <option value="c">Crítico (&gt;48h)</option>
+      <option value="a">Alerta (24–48h)</option>
+      <option value="o">OK (&lt;24h)</option>
+    </select>
+  </div>
+  <div class="tw"><table>
+    <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Emissão</th><th>Prazo entrega</th><th>Aging</th><th>Situação</th></tr></thead>
+    <tbody id="ftb"></tbody>
+  </table></div>
+  <div id="fem" class="empty" style="display:none">Sem pedidos com estes filtros.</div>
+</div>
+
+<div class="tp" id="tp-pend">
+  <div class="note">% Pendência = pedidos VTX com pendência (cancelamento total + parcial + ruptura) ÷ VTX tratados. Pedidos ainda a faturar ficam fora do denominador.</div>
+  <div class="pend-layout">
+    <div class="card" style="min-width:240px;flex:1">
+      <div class="sl">Pendência por loja de origem</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:10px">% de pedidos VTX tratados com algum tipo de pendência</p>
+      <div id="pendList"></div>
+    </div>
+    <div class="card" style="flex:2;min-width:320px">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+        <div>
+          <div class="sl" style="margin-bottom:2px">Pendências por dia</div>
+          <p style="font-size:12px;color:#888780">Pedidos VTX com cancelamento total ou parcial</p>
+        </div>
+        <div id="lojaFilters" style="display:flex;flex-wrap:wrap;gap:4px;max-width:320px"></div>
+      </div>
+      <div style="position:relative;width:100%;height:220px">
+        <canvas id="pendChart" role="img" aria-label="Gráfico de linhas de pendências diárias por loja">Pendências diárias por loja no período selecionado.</canvas>
+      </div>
+    </div>
+  </div>
+  <div class="card" id="realCard" style="display:none">
+    <div class="sl">Realocados ainda a faturar</div>
+    <div class="tw"><table>
+      <thead><tr><th>Pedido</th><th>Loja faturante</th><th>Status</th><th>Ref. original (Pedido Marketplace)</th><th>Aging</th></tr></thead>
+      <tbody id="rtb"></tbody>
+    </table></div>
+  </div>
+</div>
+
+<p class="ts" id="ts"></p>
+</div>
+</div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script>
+const STORAGE_KEY='loja3_dash_v5';
+let DATA=[], LOAD_TIME=new Date(), pendChart=null, activeLojaSet=new Set();
+
+const STATUS_FAT=['ENTREGUE','AGEMBARQUE','AGCONFIRMACAODEENTREGA','AGCONFIRMACAO'];
+const LOJA_COLORS={'BARRA SHOPPING':'#E24B4A','BOTAFOGO':'#185FA5','CD BENFICA':'#854F0B','CERQUEIRA CESAR':'#3C3489','HIGIENOPOLIS':'#27500A','ICARAIRJ':'#0C447C','IPANEMA':'#639922','LEBLON':'#A32D2D','PINHEIROS':'#1D9E75','RIO SUL':'#888780','TIJUCA':'#D85A30'};
+
+function ns(s){return String(s||'').toUpperCase().replace(/[ÀÁÂÃÄ]/g,'A').replace(/[ÇĆ]/g,'C').replace(/[ÈÉÊË]/g,'E').replace(/[ÌÍÎÏ]/g,'I').replace(/[ÒÓÔÕÖ]/g,'O').replace(/[ÙÚÛÜ]/g,'U').replace(/[^A-Z0-9]/g,'');}
+function isFat(s){return STATUS_FAT.includes(ns(s));}
+function isCan(c){return String(c||'').toUpperCase().includes('CANCELADO TOTAL');}
+function isRupt(o){return String(o||'').toLowerCase().includes('processo automatico de divergencia');}
+function isSusp(s){const v=String(s||'').toLowerCase().trim();return v==='true'||v==='verdadeiro'||v==='1';}
+function normLoja(s){s=String(s||'').trim().toUpperCase();if(!s||s==='NAN')return'CD BENFICA';return s.replace(/^E-COMMERCE\s*/,'').trim()||'CD BENFICA';}
+
+function toDateTime(v){
+  if(!v&&v!==0)return null;
+  if(v instanceof Date)return isNaN(v.getTime())?null:v;
+  if(typeof v==='number'&&v>1&&v<200000)return new Date(Date.UTC(1899,11,30)+v*86400000);
+  if(typeof v==='string'&&v.trim()){
+    const d=new Date(v);if(!isNaN(d.getTime()))return d;
+    const m=v.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})/);
+    if(m)return new Date(+m[3],+m[2]-1,+m[1]);
+  }
+  return null;
+}
+function fmtDT(d){if(!d)return'—';return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+'h'+String(d.getMinutes()).padStart(2,'0');}
+function fmtD(d){if(!d)return'—';return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
+function fmtDshort(d){if(!d)return'—';return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');}
+function fmtH(h){if(h===null||h===undefined)return'—';if(h>=24)return Math.floor(h/24)+'d '+Math.round(h%24)+'h';return Math.round(h)+'h';}
+function parseHoras(h){if(!h)return null;const m=String(h).match(/(\d+)h(\d+)m/);return m?+m[1]+m[2]/60:null;}
+function toNum(v){try{return parseFloat(String(v).replace(',','.'));}catch{return 0;}}
+function extractCore(mkt){if(!mkt)return null;const m=String(mkt).match(/(\d{10,})/);return m?m[1].slice(-7):null;}
+function vtxNum(p){const m=String(p).match(/VTX-(\d+)-/);return m?m[1]:null;}
+function fmtCliente(s){return String(s||'').trim().replace(/^\d+\s*-\s*/,'').trim().slice(0,28)||'—';}
+function findCol(keys,candidates){
+  // Try exact match first, then partial
+  for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim()===c.toLowerCase());if(f)return f;}
+  for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim().includes(c.toLowerCase()));if(f)return f;}
+  return null;
+}
+
+function processData(rows,filename){
+  LOAD_TIME=new Date();
+  rows=rows.filter(r=>{
+    const desc=String(r['Desc Tipo Pedido']||'').toUpperCase();
+    const ped=String(r['Pedido']||'').toUpperCase();
+    const susp=r['Suspenso']||r['suspenso']||'';
+    return !desc.includes('ENCOMENDA')&&!ped.startsWith('OMNI')&&!isSusp(susp);
+  });
+  const keys=rows.length?Object.keys(rows[0]):[];
+  const C={
+    pedido:findCol(keys,['Pedido'])||'Pedido',
+    desc:findCol(keys,['Desc Tipo Pedido'])||'Desc Tipo Pedido',
+    status:findCol(keys,['Status Workflow'])||'Status Workflow',
+    cancel:findCol(keys,['Cancelado'])||'Cancelado',
+    obs:findCol(keys,['Obs'])||'Obs',
+    mkt:findCol(keys,['Pedido Marketplace'])||'Pedido Marketplace',
+    digit:findCol(keys,['data digitação','data digitacao']),
+    emis:findCol(keys,['data de emissão','data de emissao']),
+    nota:findCol(keys,['data hora nota','hora nota']),
+    nfdata:findCol(keys,['nf data','nf_data']),
+    hfat:findCol(keys,['horas para faturar']),
+    entrega:findCol(keys,['data de entrega']),
+    cliente:findCol(keys,['cliente']),
+    slr:findCol(keys,['n. pedido cliente','n pedido cliente']),
+    qtdePed:findCol(keys,['qtde pedido']),
+    qtdeEnt:findCol(keys,['qtde entregue']),
+  };
+  DATA=rows.filter(r=>String(r[C.pedido]||'').trim().length>3).map(r=>{
+    const pedido=String(r[C.pedido]||'').trim();
+    const status=String(r[C.status]||'').trim();
+    const fat=isFat(status),can=isCan(r[C.cancel]||''),rupt=isRupt(r[C.obs]||'');
+    const mkt=String(r[C.mkt]||'').trim();
+    const dtE=toDateTime(C.digit?r[C.digit]:null)||toDateTime(C.emis?r[C.emis]:null);
+    const dtN=toDateTime(C.nota?r[C.nota]:null)||toDateTime(C.nfdata?r[C.nfdata]:null);
+    const dtD=toDateTime(C.entrega?r[C.entrega]:null);
+    let hf=null;
+    if(C.hfat&&r[C.hfat])hf=parseHoras(r[C.hfat]);
+    if(hf===null&&fat&&dtE&&dtN)hf=(dtN-dtE)/3600000;
+    const qp=toNum(C.qtdePed?r[C.qtdePed]:0),qe=toNum(C.qtdeEnt?r[C.qtdeEnt]:0);
+    const pp=fat&&qp>0&&qe<qp;
+    const aging=(!fat&&!can&&dtE)?(LOAD_TIME-dtE)/3600000:null;
+    return{pedido,tipo:pedido.startsWith('VTX')?'VTX':'REALOCADO',
+      loja:normLoja(r[C.desc]||''),status,fat,can,rupt,mkt,
+      dtE,dtN,dtD,hf,aging,pp,
+      slr:C.slr?String(r[C.slr]||''):'',
+      cliente:C.cliente?fmtCliente(r[C.cliente]):'—',
+      vtxNum:vtxNum(pedido),mktCore:extractCore(mkt)};
+  });
+  try{localStorage.setItem(STORAGE_KEY,JSON.stringify({filename:filename||'arquivo',savedAt:new Date().toISOString(),rows:rows.slice(0,6000)}));}catch(e){}
+  renderAll(filename);
+}
+
+function renderAll(filename){
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('dash').style.display='block';
+  document.getElementById('btnClear').style.display='inline-block';
+  const total=DATA.length,fat=DATA.filter(d=>d.fat).length;
+  const pend=DATA.filter(d=>!d.fat&&!d.can).length;
+  const crit=DATA.filter(d=>d.aging>48).length,alrt=DATA.filter(d=>d.aging>=24&&d.aging<=48).length;
+  const vtxA=DATA.filter(d=>d.tipo==='VTX'),realC=DATA.filter(d=>d.tipo==='REALOCADO').length;
+  const rc=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
+  const vt=vtxA.filter(d=>d.fat||d.can||rc.has(d.vtxNum));
+  const vp=vtxA.filter(d=>d.can||d.pp||rc.has(d.vtxNum));
+  const pp=vt.length?Math.round(vp.length/vt.length*1000)/10:0;
+  document.getElementById('metricsRow').innerHTML=`
+    <div class="mc"><div class="ml">Total</div><div class="mv">${total.toLocaleString('pt-BR')}</div><div class="ms">${vtxA.length} VTX · ${realC} realoc.</div></div>
+    <div class="mc"><div class="ml">Faturados</div><div class="mv vo">${fat.toLocaleString('pt-BR')}</div><div class="ms">${total?Math.round(fat/total*100):0}% do total</div></div>
+    <div class="mc"><div class="ml">A faturar</div><div class="mv vw">${pend}</div><div class="ms">não faturados</div></div>
+    <div class="mc mc-crit"><div class="ml">Críticos &gt;48h</div><div class="mv">${crit}</div><div class="ms">parados há +48h</div></div>
+    <div class="mc mc-alrt"><div class="ml">Alerta 24–48h</div><div class="mv">${alrt}</div><div class="ms">atenção</div></div>
+    <div class="mc"><div class="ml">% Pendência</div><div class="mv">${pp}%</div><div class="ms">${vp.length} VTX afetados</div></div>`;
+  const datas=DATA.filter(d=>d.dtE).map(d=>d.dtE.getTime());
+  if(datas.length){
+    const mn=new Date(Math.min(...datas)),mx=new Date(Math.max(...datas));
+    document.getElementById('periodo').textContent=fmtDshort(mn)+' – '+fmtD(mx);
+    document.getElementById('subtitle').textContent=`${total.toLocaleString('pt-BR')} pedidos · ${filename||''}`;
+  }
+  document.getElementById('savedBanner').style.display='flex';
+  document.getElementById('savedMsg').textContent=`Dados salvos · ${filename||''} · ${new Date().toLocaleString('pt-BR')}`;
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const fl=document.getElementById('fL');fl.innerHTML='<option value="">Todas</option>';
+  lojas.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;fl.appendChild(o);});
+  const sts=[...new Set(DATA.filter(d=>!d.fat&&!d.can).map(d=>d.status).filter(s=>s&&s!=='nan'))].sort();
+  const fs=document.getElementById('fS');fs.innerHTML='<option value="">Todos</option>';
+  sts.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fs.appendChild(o);});
+  rL();rF();rPend();
+  document.getElementById('ts').textContent='Processado em: '+new Date().toLocaleString('pt-BR');
+}
+
+function sb(s){
+  const u=ns(s);
+  if(u.includes('FATURAMENTO'))return'<span class="b bwn">Ag. Fat.</span>';
+  if(u.includes('CONFIRMACAO'))return'<span class="b bif">Ag. Conf.</span>';
+  if(u.includes('APROVACAO'))return'<span class="b bpp">Ag. Aprov.</span>';
+  if(u.includes('EMBARQUE'))return'<span class="b bok">Ag. Embarque</span>';
+  if(u==='ENTREGUE')return'<span class="b bok">Entregue</span>';
+  return`<span class="b bnt">${s||'—'}</span>`;
+}
+function ac(a){return a>48?'bdg':a>=24?'bwn':'bok';}
+function as2(a){return a>48?'<span class="b bdg">Crítico</span>':a>=24?'<span class="b bwn">Alerta</span>':'<span class="b bok">Normal</span>';}
+
+function rF(){
+  const lv=document.getElementById('fL').value,sv=document.getElementById('fS').value,av=document.getElementById('fA').value;
+  let rows=DATA.filter(d=>!d.fat&&!d.can);
+  if(lv)rows=rows.filter(d=>d.loja===lv);
+  if(sv)rows=rows.filter(d=>d.status===sv);
+  if(av==='c')rows=rows.filter(d=>d.aging>48);
+  else if(av==='a')rows=rows.filter(d=>d.aging>=24&&d.aging<=48);
+  else if(av==='o')rows=rows.filter(d=>d.aging!==null&&d.aging<24);
+  rows.sort((a,b)=>(b.aging||0)-(a.aging||0));
+  const tb=document.getElementById('ftb'),em=document.getElementById('fem');
+  if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
+  em.style.display='none';
+  tb.innerHTML=rows.map(r=>`<tr class="${(r.aging||0)>48?'alr':''}">
+    <td style="font-weight:500;font-size:11px">${r.pedido}</td>
+    <td style="font-size:11px;color:#888780">${r.slr||'—'}</td>
+    <td style="font-size:12px">${r.cliente}</td>
+    <td>${r.tipo==='REALOCADO'?'<span class="b bpp">Realocado</span>':'<span class="b bnt">VTX</span>'}</td>
+    <td>${r.loja}</td><td>${sb(r.status)}</td>
+    <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtE)}</td>
+    <td style="color:#888780">${fmtD(r.dtD)}</td>
+    <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
+    <td>${as2(r.aging||0)}</td>
+  </tr>`).join('');
+}
+
+let sCol='media_h',sDir=1;
+function sL(col){
+  if(sCol===col)sDir*=-1;else{sCol=col;sDir=1;}
+  document.querySelectorAll('#ltable th').forEach(t=>t.classList.remove('sa','sd'));
+  const m={loja:0,total:1,pct_fat:2,a_faturar:3,cancelados:4,media_h:5,pct_pend:6};
+  if(m[col]!==undefined)document.querySelectorAll('#ltable th')[m[col]].classList.add(sDir===1?'sa':'sd');
+  rL();
+}
+function rL(){
+  const rc=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
+  const vtxA=DATA.filter(d=>d.tipo==='VTX');
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const stats=lojas.map(l=>{
+    const g=DATA.filter(d=>d.loja===l);
+    const vg=vtxA.filter(d=>d.loja===l);
+    const vt=vg.filter(d=>d.fat||d.can||rc.has(d.vtxNum));
+    const vp=vg.filter(d=>d.can||d.pp||rc.has(d.vtxNum));
+    const fr=g.filter(d=>d.fat&&d.hf!==null);
+    return{loja:l,total:g.length,faturados:g.filter(d=>d.fat).length,
+      a_faturar:g.filter(d=>!d.fat&&!d.can).length,
+      crit:g.filter(d=>d.aging!==null&&d.aging>48).length,
+      alrt:g.filter(d=>d.aging!==null&&d.aging>=24&&d.aging<=48).length,
+      cancelados:g.filter(d=>d.can).length,
+      pct_fat:Math.round(g.filter(d=>d.fat).length/g.length*1000)/10,
+      media_h:fr.length?fr.reduce((s,d)=>s+d.hf,0)/fr.length:null,
+      pct_pend:vt.length?Math.round(vp.length/vt.length*1000)/10:0};
+  });
+  const vh=stats.filter(s=>s.media_h!==null).map(s=>s.media_h);
+  const mn=vh.length?Math.min(...vh):0,mx=vh.length?Math.max(...vh):0;
+  const sorted=[...stats].sort((a,b)=>{const va=a[sCol]??'',vb=b[sCol]??'';return typeof va==='string'?sDir*va.localeCompare(vb):sDir*(va-vb);});
+  document.getElementById('ltb').innerHTML=sorted.map(l=>{
+    const isFast=l.media_h!==null&&l.media_h===mn,isSlow=l.media_h!==null&&l.media_h===mx;
+    const hC=isFast?'td-h td-fast':isSlow?'td-h td-slow':'td-h';
+    const hB=isFast?' <span class="b bok">Mais rápida</span>':isSlow?' <span class="b bdg">Mais lenta</span>':'';
+    const fc=l.pct_fat>=93?'#27500a':l.pct_fat>=85?'#854f0b':'#a32d2d';
+    const pc=l.pct_fat>=93?'bok':l.pct_fat>=85?'bwn':'bdg';
+    const lb=l.pct_fat>=93?'Bom':l.pct_fat>=85?'Regular':'Atenção';
+    const pC=l.pct_pend>=20?'#a32d2d':l.pct_pend>=10?'#854f0b':'#1a1a18';
+    const cs=l.crit>0?` <span class="b bdg">${l.crit} crit.</span>`:'';
+    const as=l.alrt>0?` <span class="b bwn">${l.alrt} alrt.</span>`:'';
+    return`<tr><td style="font-weight:500">${l.loja}</td><td>${l.total}</td>
+      <td><span class="pct-fat" style="color:${fc}">${l.pct_fat}%</span> <span style="font-size:11px;color:#aaa">(${l.faturados})</span></td>
+      <td><div class="af-wrap">${l.a_faturar}${cs}${as}</div></td>
+      <td>${l.cancelados}</td>
+      <td class="${hC}">${l.media_h!==null?fmtH(l.media_h):'—'}${hB}</td>
+      <td><span style="font-weight:500;color:${pC}">${l.pct_pend>0?l.pct_pend+'%':'—'}</span></td>
+      <td><span class="b ${pc}">${lb}</span></td></tr>`;
+  }).join('');
+}
+
+function rPend(){
+  const rc=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
+  const vtxA=DATA.filter(d=>d.tipo==='VTX');
+  const lojas=[...new Set(vtxA.map(d=>d.loja))].sort();
+  const pl=lojas.map(l=>{
+    const g=vtxA.filter(d=>d.loja===l);
+    const trat=g.filter(d=>d.fat||d.can||rc.has(d.vtxNum)).length;
+    const cr=g.filter(d=>d.can||d.pp||rc.has(d.vtxNum)).length;
+    return{l,trat,cr,pct:trat?Math.round(cr/trat*1000)/10:0};
+  }).filter(x=>x.cr>0).sort((a,b)=>b.pct-a.pct);
+  const maxP=pl.length?pl[0].pct:1;
+  document.getElementById('pendList').innerHTML=pl.map(x=>{
+    const color=x.pct>=20?'#e24b4a':x.pct>=10?'#ba7517':'#639922';
+    return`<div class="rrow"><span style="font-size:12px">${x.l}</span>
+      <span style="display:flex;align-items:center;gap:6px">
+        <span style="width:80px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.pct/maxP*100,100)}%;background:${color};border-radius:99px"></span></span>
+        <span style="font-weight:500;color:${color};min-width:36px;text-align:right;font-size:12px">${x.pct}%</span>
+        <span style="font-size:11px;color:#aaa">(${x.cr}/${x.trat})</span>
+      </span></div>`;
+  }).join('')||'<p style="font-size:13px;color:#aaa;text-align:center;padding:16px">Nenhuma pendência identificada.</p>';
+
+  // Realocados pendentes
+  const rp=DATA.filter(d=>d.tipo==='REALOCADO'&&d.rupt&&!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
+  if(rp.length){
+    document.getElementById('realCard').style.display='block';
+    document.getElementById('rtb').innerHTML=rp.map(r=>`<tr class="${(r.aging||0)>48?'alr':''}">
+      <td style="font-weight:500;font-size:11px">${r.pedido}</td><td>${r.loja}</td><td>${sb(r.status)}</td>
+      <td style="font-size:11px;color:#888780">${r.mkt||'—'}</td>
+      <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td></tr>`).join('');
+  }
+
+  // Build chart data from DATA
+  const pendVtx=DATA.filter(d=>d.tipo==='VTX'&&(d.can||d.pp)&&d.dtE);
+  const dateMap={};
+  pendVtx.forEach(d=>{
+    const key=d.dtE.getFullYear()+'-'+String(d.dtE.getMonth()+1).padStart(2,'0')+'-'+String(d.dtE.getDate()).padStart(2,'0');
+    if(!dateMap[key])dateMap[key]={};
+    dateMap[key][d.loja]=(dateMap[key][d.loja]||0)+1;
+  });
+  const allDates=Object.keys(dateMap).sort();
+  const allLojasChart=[...new Set(pendVtx.map(d=>d.loja))].sort();
+  const series={};
+  allLojasChart.forEach(l=>{series[l]=allDates.map(dt=>dateMap[dt][l]||0);});
+  const totalsChart=allLojasChart.map(l=>series[l].reduce((a,b)=>a+b,0));
+  const top5=allLojasChart.slice().sort((a,b)=>totalsChart[allLojasChart.indexOf(b)]-totalsChart[allLojasChart.indexOf(a)]).slice(0,5);
+  activeLojaSet=new Set(top5);
+  buildChartFilters(allLojasChart,{dates:allDates,series});
+  drawPendChart({dates:allDates,series},allLojasChart);
+}
+
+function buildChartFilters(lojas,chartData){
+  const container=document.getElementById('lojaFilters');
+  container.innerHTML='';
+  lojas.forEach(l=>{
+    const c=LOJA_COLORS[l]||'#888';
+    const active=activeLojaSet.has(l);
+    const btn=document.createElement('button');
+    btn.className='lbtn';
+    btn.style.cssText=`border:1px solid ${c};background:${active?c:'transparent'};color:${active?'#fff':c}`;
+    btn.textContent=l.split(' ').map(w=>w[0]).join('').slice(0,3);
+    btn.title=l;
+    btn.onclick=()=>{
+      if(activeLojaSet.has(l)){activeLojaSet.delete(l);btn.style.background='transparent';btn.style.color=c;}
+      else{activeLojaSet.add(l);btn.style.background=c;btn.style.color='#fff';}
+      drawPendChart(chartData,lojas);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function drawPendChart(chartData,allLojas){
+  const canvas=document.getElementById('pendChart');
+  if(!canvas)return;
+  if(pendChart){pendChart.destroy();pendChart=null;}
+  const labels=chartData.dates.map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
+  const datasets=allLojas.filter(l=>activeLojaSet.has(l)).map(l=>({
+    label:l,data:chartData.series[l],
+    borderColor:LOJA_COLORS[l]||'#888',
+    backgroundColor:(LOJA_COLORS[l]||'#888')+'22',
+    borderWidth:2,pointRadius:2,pointHoverRadius:4,tension:0.3,fill:false
+  }));
+  pendChart=new Chart(canvas,{
+    type:'line',data:{labels,datasets},
+    options:{responsive:true,maintainAspectRatio:false,
+      interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>i[0].label,label:i=>` ${i.dataset.label}: ${i.raw}`}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',maxRotation:45,autoSkip:true,maxTicksLimit:16}},
+        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',precision:0,stepSize:1}}
+      }
+    }
+  });
+}
+
+function sw(n){
+  const ns=['lojas','fila','pend'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ns[i]===n));
+  ns.forEach(x=>document.getElementById('tp-'+x).classList.toggle('on',x===n));
+  if(n==='pend'&&DATA.length&&!pendChart)rPend();
+}
+
+function clearData(){
+  try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  DATA=[];pendChart=null;
+  document.getElementById('dash').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('savedBanner').style.display='none';
+  document.getElementById('btnClear').style.display='none';
+  document.getElementById('periodo').textContent='Sem dados';
+  document.getElementById('subtitle').textContent='Faça upload do CSV/Excel exportado do Millennium';
+}
+
+function handleFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>processData(r.data,file.name)});}
+  else{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const wb=XLSX.read(ev.target.result,{type:'array',cellDates:true,dateNF:'yyyy-mm-dd hh:mm:ss'});
+      processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:false,dateNF:'yyyy-mm-dd hh:mm:ss'}),file.name);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+const zone=document.getElementById('uploadZone');
+if(zone){
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])handleFile({target:{files:e.dataTransfer.files}});});
+}
+
+window.addEventListener('load',()=>{
+  try{
+    const saved=localStorage.getItem(STORAGE_KEY);
+    if(saved){
+      const p=JSON.parse(saved);
+      if(p&&p.rows&&p.rows.length){
+        document.getElementById('savedBanner').style.display='flex';
+        document.getElementById('savedMsg').textContent=`Carregando dados salvos · ${p.filename} · salvo em ${new Date(p.savedAt).toLocaleString('pt-BR')}`;
+        processData(p.rows,p.filename+' (cache)');
+      }
+    }
+  }catch(e){console.warn('Erro localStorage');}
+});
+</script>
+</body>
+</html>

@@ -80,14 +80,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 
 <div id="savedBanner" class="saved-banner" style="display:none">
   <span id="savedMsg"></span>
-  <button class="btn-sm" onclick="document.getElementById('fileInput').click()">Atualizar arquivo</button>
+  <button class="btn-sm" onclick="document.getElementById('fileInput').click()" style="cursor:pointer">Atualizar arquivo</button>
 </div>
 
-<div class="upload-zone" id="uploadZone" onclick="document.getElementById('fileInput').click()">
+<label class="upload-zone" id="uploadZone" for="fileInput" style="display:block;cursor:pointer">
   <p>Arraste o arquivo exportado do Millennium aqui</p>
   <span>CSV ou Excel (.xlsx) — ou clique para selecionar</span>
-  <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none" onchange="handleFile(event)">
-</div>
+</label>
+<input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="display:none;position:absolute;left:-9999px" onchange="handleFile(event)">
 
 <div id="dash" style="display:none">
 <div class="mg" id="metricsRow"></div>
@@ -205,7 +205,12 @@ function toNum(v){try{return parseFloat(String(v).replace(',','.'));}catch{retur
 function extractCore(mkt){if(!mkt)return null;const m=String(mkt).match(/(\d{10,})/);return m?m[1].slice(-7):null;}
 function vtxNum(p){const m=String(p).match(/VTX-(\d+)-/);return m?m[1]:null;}
 function fmtCliente(s){return String(s||'').trim().replace(/^\d+\s*-\s*/,'').trim().slice(0,28)||'—';}
-function findCol(keys,candidates){for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim().includes(c.toLowerCase()));if(f)return f;}return null;}
+function findCol(keys,candidates){
+  // Try exact match first, then partial
+  for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim()===c.toLowerCase());if(f)return f;}
+  for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim().includes(c.toLowerCase()));if(f)return f;}
+  return null;
+}
 
 function processData(rows,filename){
   LOAD_TIME=new Date();
@@ -510,9 +515,11 @@ function handleFile(e){
 }
 
 const zone=document.getElementById('uploadZone');
-zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
-zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
-zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])handleFile({target:{files:e.dataTransfer.files}});});
+if(zone){
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])handleFile({target:{files:e.dataTransfer.files}});});
+}
 
 window.addEventListener('load',()=>{
   try{

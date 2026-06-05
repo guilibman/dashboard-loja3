@@ -119,9 +119,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       <th onclick="sL('total')">Total</th>
       <th onclick="sL('pct_fat')" class="sa">Faturados</th>
       <th onclick="sL('a_faturar')">A faturar</th>
-      <th onclick="sL('cancelados')">Cancelados</th>
-      <th onclick="sL('media_h')">Tempo médio fat. (total)</th>
-      <th>Últimos 7d vs ant.</th>
+      <th onclick="sL('media_h')">Tempo médio fat.</th>
       <th onclick="sL('pct_pend')">% Pendência</th>
       <th>Desempenho</th>
     </tr></thead>
@@ -545,7 +543,7 @@ let sCol='media_h',sDir=1;
 function sL(col){
   if(sCol===col)sDir*=-1;else{sCol=col;sDir=1;}
   document.querySelectorAll('#ltable th').forEach(t=>t.classList.remove('sa','sd'));
-  const m={loja:0,total:1,pct_fat:2,a_faturar:3,cancelados:4,media_h:5,pct_pend:6};
+  const m={loja:0,total:1,pct_fat:2,a_faturar:3,media_h:4,pct_pend:5};
   if(m[col]!==undefined)document.querySelectorAll('#ltable th')[m[col]].classList.add(sDir===1?'sa':'sd');
   rL();
 }
@@ -596,11 +594,15 @@ function rL(){
     const cF=s1.length>=3?Math.round(s1.filter(d=>d.hf>48).length/s1.length*100):null;
     const cFstr=cF!==null?'<span style="font-size:10px;color:'+(cF>30?'#a32d2d':cF>15?'#854f0b':'#888')+';margin-left:6px">'+cF+'% atras. 7d</span>':'';
     const mediaStr=a1!==null?'<strong>'+fmtH(a1)+'</strong>'+trend+(a2!==null?' <span style="font-size:10px;color:#aaa">vs '+fmtH(a2)+'</span>':''):(l.media_h!==null?fmtH(l.media_h):'\u2014');
+    // Compact tempo médio cell: média 7d + tendência + % atrasados
+    const tempoCell='<div style="line-height:1.4">'+
+      '<span class="'+hC+'" style="white-space:nowrap">'+mediaStr+hB+'</span>'+
+      (cFstr?'<div style="margin-top:2px">'+cFstr+'</div>':'')+
+      '</div>';
     return '<tr><td style="font-weight:500">'+l.loja+'</td><td>'+l.total+'</td>'+
       '<td><span class="pct-fat" style="color:'+fc+'">'+l.pct_fat+'%</span> <span style="font-size:11px;color:#aaa">('+l.faturados+')</span></td>'+
       '<td><div class="af-wrap">'+l.a_faturar+cs+als+'</div></td>'+
-      '<td>'+l.cancelados+'</td>'+
-      '<td class="'+hC+'" style="white-space:nowrap">'+mediaStr+hB+cFstr+'</td>'+
+      '<td>'+tempoCell+'</td>'+
       '<td><span style="font-weight:500;color:'+pC+'">'+(l.pct_pend>0?l.pct_pend+'%':'\u2014')+'</span></td>'+
       '<td><span class="b '+pc+'">'+lb+'</span></td></tr>';
   }).join('');

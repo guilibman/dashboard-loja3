@@ -30,9 +30,6 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab:hover{color:#1a1a18}
 .tab.on{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
 .tp{display:none}.tp.on{display:block}
-.fr{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
-.fr label{font-size:13px;color:#888780}
-.fr select{font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;cursor:pointer}
 .tw{overflow-x:auto;border:1px solid #e5e4e0;border-radius:8px}
 table{width:100%;font-size:12px;border-collapse:collapse}
 th{font-size:11px;font-weight:500;color:#888780;text-align:left;padding:8px 10px;border-bottom:1px solid #e5e4e0;background:#fafaf8;white-space:nowrap;cursor:pointer}
@@ -54,12 +51,18 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .upload-zone{background:#fff;border:2px dashed #d3d1c7;border-radius:8px;padding:32px;text-align:center;margin-bottom:20px;cursor:pointer;transition:border-color .15s}
 .upload-zone:hover,.upload-zone.drag{border-color:#1a1a18}
 .upload-zone p{font-size:14px;color:#5f5e5a;margin-bottom:4px}
-.upload-zone span{font-size:12px;color:#aaa}
-.saved-banner{background:#eaf3de;border:1px solid #c2dba1;border-radius:6px;padding:8px 14px;font-size:12px;color:#27500a;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px}
+.upload-zone span{font-size:12px;color:#aaa;display:block;margin-bottom:12px}
+.saved-banner{background:#eaf3de;border:1px solid #c2dba1;border-radius:6px;padding:8px 14px;font-size:12px;color:#27500a;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer}
 .td-h{font-weight:700;font-size:13px}.td-fast{color:#27500a}.td-slow{color:#a32d2d}
 .pct-fat{font-weight:700;font-size:13px}
 .af-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:12px}
 .lbtn{font-size:10px;padding:2px 7px;border-radius:99px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.aging-toggle{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
+.atg{font-size:12px;padding:4px 12px;border-radius:99px;cursor:pointer;border:1px solid #d3d1c7;background:transparent;color:#888780;transition:all .15s}
+.atg.on{background:#1a1a18;color:#fff;border-color:#1a1a18;font-weight:500}
+.fr{display:flex;gap:10px;align-items:center;margin-bottom:12px;flex-wrap:wrap}
+.fr label{font-size:13px;color:#888780}
+.fr select{font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;cursor:pointer}
 .empty{text-align:center;padding:24px;font-size:13px;color:#aaa}
 .ts{font-size:11px;color:#aaa;margin-top:16px;text-align:right}
 @media(max-width:600px){.pend-layout{flex-direction:column}.mg{grid-template-columns:repeat(2,1fr)}}
@@ -71,33 +74,27 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 <div class="header">
   <div>
     <h1>Pedidos ERP — Loja 3</h1>
-    <p style="font-size:12px;color:#888780;margin-top:2px" id="subtitle">Faça upload do CSV/Excel exportado do Millennium</p>
+    <p style="font-size:12px;color:#888780;margin-top:2px" id="subtitle">Carregando dados...</p>
   </div>
   <div class="header-right">
-    <span class="badge-periodo" id="periodo">Sem dados</span>
+    <span class="badge-periodo" id="periodo">—</span>
     <button class="btn-sm" id="btnClear" style="display:none" onclick="clearData()">Limpar dados</button>
   </div>
 </div>
 
-<div id="loadingBanner" style="display:none;text-align:center;padding:3rem 1rem">
+<div id="loadingBanner" style="text-align:center;padding:3rem 1rem">
   <p style="font-size:15px;color:#1a1a18;font-weight:500;margin-bottom:8px">Carregando dados...</p>
-  <p style="font-size:13px;color:#888780">Buscando pedidos.xlsx do servidor</p>
-  <div style="margin-top:16px;display:flex;justify-content:center;gap:6px" id="loadDots">
-    <span style="width:8px;height:8px;border-radius:99px;background:#d3d1c7;display:inline-block;animation:pulse 1.2s ease-in-out infinite"></span>
-    <span style="width:8px;height:8px;border-radius:99px;background:#d3d1c7;display:inline-block;animation:pulse 1.2s ease-in-out .2s infinite"></span>
-    <span style="width:8px;height:8px;border-radius:99px;background:#d3d1c7;display:inline-block;animation:pulse 1.2s ease-in-out .4s infinite"></span>
-  </div>
+  <p style="font-size:13px;color:#888780">Buscando pedidos.xlsx</p>
 </div>
-<style>@keyframes pulse{0%,100%{opacity:.3}50%{opacity:1}}</style>
 
 <div id="savedBanner" class="saved-banner" style="display:none">
   <span id="savedMsg"></span>
-  <button class="btn-sm"  style="cursor:pointer">Atualizar arquivo</button>
+  <button class="btn-sm" onclick="document.getElementById('fileInput').click();event.stopPropagation()">Atualizar arquivo</button>
 </div>
 
-<label class="upload-zone" id="uploadZone" for="fileInput" style="display:block;cursor:pointer">
+<label class="upload-zone" id="uploadZone" for="fileInput" style="display:none">
   <p>Arraste o arquivo exportado do Millennium aqui</p>
-  <span style="display:block;margin-bottom:12px">CSV ou Excel (.xlsx)</span>
+  <span>CSV ou Excel (.xlsx)</span>
   <span style="display:inline-block;background:#1a1a18;color:#fff;font-size:13px;padding:8px 20px;border-radius:6px;font-weight:500">Selecionar arquivo</span>
 </label>
 <input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" onchange="handleFile(event)">
@@ -111,6 +108,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   <button class="tab" onclick="sw('pend')">Pendência</button>
 </div>
 
+<!-- PERFORMANCE LOJAS -->
 <div class="tp on" id="tp-lojas">
   <p style="font-size:12px;color:#888780;margin-bottom:10px">Ordenado por tempo médio de faturamento. Clique em qualquer coluna para reordenar.</p>
   <div class="tw"><table id="ltable">
@@ -120,6 +118,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       <th onclick="sL('pct_fat')" class="sa">Faturados</th>
       <th onclick="sL('a_faturar')">A faturar</th>
       <th onclick="sL('media_h')">Tempo médio fat.</th>
+      <th>SLA entrega</th>
       <th onclick="sL('pct_pend')">% Pendência</th>
       <th>Desempenho</th>
     </tr></thead>
@@ -127,23 +126,23 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   </table></div>
 </div>
 
+<!-- PEDIDOS -->
 <div class="tp" id="tp-pedidos">
-  <div style="display:flex;gap:0;margin-bottom:14px;border:.5px solid var(--color-border-secondary, #d3d1c7);border-radius:6px;width:fit-content;overflow:hidden">
-    <button id="tgl-afaturar" onclick="setPedidoMode('afaturar')" style="font-size:13px;padding:6px 18px;cursor:pointer;border:none;background:#1a1a18;color:#fff;font-weight:500">A faturar</button>
-    <button id="tgl-faturados" onclick="setPedidoMode('faturados')" style="font-size:13px;padding:6px 18px;cursor:pointer;border:none;background:transparent;color:#888780">Faturados</button>
+  <div style="display:flex;gap:0;margin-bottom:14px;border:1px solid #d3d1c7;border-radius:6px;width:fit-content;overflow:hidden">
+    <button id="tgl-af" onclick="setPedidoMode('af')" style="font-size:13px;padding:6px 18px;cursor:pointer;border:none;background:#1a1a18;color:#fff;font-weight:500">A faturar</button>
+    <button id="tgl-fat" onclick="setPedidoMode('fat')" style="font-size:13px;padding:6px 18px;cursor:pointer;border:none;background:transparent;color:#888780">Faturados</button>
   </div>
 
-  <div id="view-afaturar">
+  <div id="view-af">
     <div class="fr">
       <label>Loja</label><select id="fL" onchange="rF()"><option value="">Todas</option></select>
       <label>Status</label><select id="fS" onchange="rF()"><option value="">Todos</option></select>
-      <label>Aging</label>
-      <select id="fA" onchange="rF()">
-        <option value="">Todos</option>
-        <option value="c">Crítico (&gt;48h)</option>
-        <option value="a">Alerta (24–48h)</option>
-        <option value="o">OK (&lt;24h)</option>
-      </select>
+    </div>
+    <div class="aging-toggle" id="agingToggle">
+      <button class="atg on" onclick="setAging('')">Todos</button>
+      <button class="atg" onclick="setAging('c')">Crítico &gt;48h</button>
+      <button class="atg" onclick="setAging('a')">Alerta 24–48h</button>
+      <button class="atg" onclick="setAging('o')">OK &lt;24h</button>
     </div>
     <div class="tw"><table>
       <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Prazo entrega</th><th>Aging</th><th>Situação</th></tr></thead>
@@ -152,11 +151,11 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <div id="fem" class="empty" style="display:none">Sem pedidos com estes filtros.</div>
   </div>
 
-  <div id="view-faturados" style="display:none">
-    <div class="card" style="margin-bottom:12px">
-      <div class="sl" style="margin-bottom:10px">SLA de faturamento — estimativa de prazo</div>
+  <div id="view-fat" style="display:none">
+    <div id="slaCard" class="card" style="margin-bottom:14px">
+      <div class="sl">SLA de faturamento — estimativa de prazo ao cliente</div>
       <p style="font-size:12px;color:#888780;margin-bottom:12px">≤24h = No prazo · 24–48h = Risco · &gt;48h = Atrasou</p>
-      <div id="slaCard"></div>
+      <div id="slaInner" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px"></div>
     </div>
     <div class="fr">
       <label>Loja</label><select id="fLF" onchange="rFat()"><option value="">Todas</option></select>
@@ -164,53 +163,51 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       <label>Tempo fat.</label>
       <select id="fTF" onchange="rFat()">
         <option value="">Todos</option>
-        <option value="c">Atrasou (&gt;48h)</option>
-        <option value="a">Risco (24–48h)</option>
         <option value="o">No prazo (&lt;24h)</option>
+        <option value="a">Risco (24–48h)</option>
+        <option value="c">Atrasou (&gt;48h)</option>
       </select>
     </div>
     <div class="tw"><table>
-      <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Faturado em</th><th>Tempo fat.</th><th>Desempenho</th></tr></thead>
+      <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Faturado em</th><th>Tempo fat.</th><th>SLA</th></tr></thead>
       <tbody id="fatTb"></tbody>
     </table></div>
     <div id="fatEm" class="empty" style="display:none">Sem pedidos com estes filtros.</div>
   </div>
 </div>
 
+<!-- PENDÊNCIA -->
 <div class="tp" id="tp-pend">
-  <div class="note">% Pendência = pedidos VTX com pendência (cancelamento total + parcial + ruptura) ÷ VTX tratados. Pedidos ainda a faturar ficam fora do denominador.</div>
+  <div class="note">Pendência = pedido com Cancelamento Total ou Qtde Entregue &lt; Qtde Pedido, em qualquer pedido (VTX ou realocado). Contabilizada na loja que sinalizou a pendência.</div>
   <div class="pend-layout">
     <div class="card" style="min-width:240px;flex:1">
-      <div class="sl">Pendência por loja de origem</div>
-      <p style="font-size:12px;color:#888780;margin-bottom:10px">% de pedidos VTX tratados com algum tipo de pendência</p>
+      <div class="sl">Pendência por loja</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:10px">% de pedidos tratados com ao menos 1 pendência</p>
       <div id="pendList"></div>
     </div>
-    <div class="card" style="flex:2;min-width:320px">
+    <div class="card" style="flex:2;min-width:300px">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px">
         <div>
           <div class="sl" style="margin-bottom:2px">Pendências por dia</div>
-          <p style="font-size:12px;color:#888780">Pedidos VTX com cancelamento total ou parcial</p>
+          <p style="font-size:12px;color:#888780">Cancelamentos totais + parciais por loja</p>
         </div>
-        <div id="lojaFilters" style="display:flex;flex-wrap:wrap;gap:4px;max-width:320px"></div>
+        <div id="lojaFilters" style="display:flex;flex-wrap:wrap;gap:4px;max-width:300px"></div>
       </div>
-      <div style="position:relative;width:100%;height:220px">
-        <canvas id="pendChart" role="img" aria-label="Gráfico de linhas de pendências diárias por loja">Pendências diárias por loja no período selecionado.</canvas>
+      <div style="position:relative;width:100%;height:210px">
+        <canvas id="pendChart" role="img" aria-label="Gráfico de pendências diárias por loja"></canvas>
       </div>
     </div>
   </div>
   <div class="card" id="realCard" style="display:none">
     <div class="sl">Realocados ainda a faturar</div>
     <div class="tw"><table>
-      <thead><tr><th>Pedido</th><th>Loja faturante</th><th>Status</th><th>Ref. original (Pedido Marketplace)</th><th>Aging</th></tr></thead>
+      <thead><tr><th>Pedido</th><th>Loja faturante</th><th>Status</th><th>Ref. original</th><th>Aging</th></tr></thead>
       <tbody id="rtb"></tbody>
     </table></div>
   </div>
 </div>
 
 <p class="ts" id="ts"></p>
-<p style="text-align:right;margin-top:4px">
-  <label for="fileInput" style="font-size:11px;color:#aaa;cursor:pointer;text-decoration:underline">Carregar outro arquivo manualmente</label>
-</p>
 </div>
 </div>
 
@@ -218,103 +215,90 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 <script>
-const STORAGE_KEY='loja3_dash_v5';
-
-const VTEX_URLS={
-  'BENFICA':         'https://lojatres.myvtex.com/admin/orders',
-  'BARRA SHOPPING':  'https://lojatresbarrarj.myvtex.com/admin/orders',
-  'CERQUEIRA CESAR': 'https://lojatrescerqueirasp.myvtex.com/admin/orders',
-  'ICARAIRJ':        'https://lojatresicarairj.myvtex.com/admin/orders',
-  'HIGIENOPOLIS':    'https://lojatreshigisp.myvtex.com/admin/orders',
-  'PINHEIROS':       'https://lojatrespinheirossp.myvtex.com/admin/orders',
-  'LEBLON':          'https://lojatresleblonrj.myvtex.com/admin/orders',
-  'TIJUCA':          'https://lojatrestijucarj.myvtex.com/admin/orders',
-  'RIO SUL':         'https://lojatresriosulrj.myvtex.com/admin/orders',
-  'IPANEMA':         'https://lojatresipanemarj.myvtex.com/admin/orders',
-  'BOTAFOGO':        'https://lojatresbotafogorj.myvtex.com/admin/orders',
-};
-
-function vtexLink(pedido, loja){
-  // Use SLR number if available, else use pedido
-  const base = VTEX_URLS[loja] || VTEX_URLS['BENFICA'];
-  // For VTX pedidos, use the pedido number directly
-  // For realocados (000...), the SLR in the slr field is the marketplace order
-  return base + '/' + encodeURIComponent(pedido);
-}
-
-function pedidoCell(pedido, slr, loja){
-  // Prefer SLR for the link (marketplace order ID), fall back to pedido
-  const linkId = slr && slr.startsWith('SLR-') ? slr : pedido;
-  const base = VTEX_URLS[loja];
-  if(!base) return `<span style="font-weight:500;font-size:11px">${pedido}</span>`;
-  const url = base + '/' + encodeURIComponent(linkId);
-  return `<a href="${url}" target="_blank" rel="noopener" style="font-weight:500;font-size:11px;color:var(--color-text-primary);text-decoration:none;border-bottom:1px dotted #aaa" title="Abrir na VTEX">${pedido}</a>`;
-}
-
-
-function showLoading(show){
-  document.getElementById('loadingBanner').style.display=show?'block':'none';
-  if(!show&&document.getElementById('dash').style.display==='none'&&document.getElementById('uploadZone').style.display==='none'){
-    // nothing to show — handled by caller
-  }
-}
+const STORAGE_KEY='loja3_dash_v6';
 let DATA=[], LOAD_TIME=new Date(), pendChart=null, activeLojaSet=new Set();
 
+const VTEX_URLS={
+  'BENFICA':'https://lojatres.myvtex.com/admin/orders',
+  'BARRA SHOPPING':'https://lojatresbarrarj.myvtex.com/admin/orders',
+  'CERQUEIRA CESAR':'https://lojatrescerqueirasp.myvtex.com/admin/orders',
+  'ICARAIRJ':'https://lojatresicarairj.myvtex.com/admin/orders',
+  'HIGIENOPOLIS':'https://lojatreshigisp.myvtex.com/admin/orders',
+  'PINHEIROS':'https://lojatrespinheirossp.myvtex.com/admin/orders',
+  'LEBLON':'https://lojatresleblonrj.myvtex.com/admin/orders',
+  'TIJUCA':'https://lojatrestijucarj.myvtex.com/admin/orders',
+  'RIO SUL':'https://lojatresriosulrj.myvtex.com/admin/orders',
+  'IPANEMA':'https://lojatresipanemarj.myvtex.com/admin/orders',
+  'BOTAFOGO':'https://lojatresbotafogorj.myvtex.com/admin/orders',
+};
+
+const LOJA_COLORS={
+  'BARRA SHOPPING':'#E24B4A','BOTAFOGO':'#185FA5','BENFICA':'#854F0B',
+  'CERQUEIRA CESAR':'#3C3489','HIGIENOPOLIS':'#27500A','ICARAIRJ':'#0C447C',
+  'IPANEMA':'#639922','LEBLON':'#A32D2D','PINHEIROS':'#1D9E75',
+  'RIO SUL':'#888780','TIJUCA':'#D85A30'
+};
+
+// WA numbers per loja
+const WA_NUMBERS={
+  'BARRA SHOPPING':'','BOTAFOGO':'','BENFICA':'','CERQUEIRA CESAR':'',
+  'HIGIENOPOLIS':'','ICARAIRJ':'','IPANEMA':'','LEBLON':'',
+  'PINHEIROS':'','RIO SUL':'','TIJUCA':''
+};
+
 const STATUS_FAT=['ENTREGUE','AGEMBARQUE','AGCONFIRMACAODEENTREGA','AGCONFIRMACAO'];
-// AG APROVACAO PLATAFORMA is faturado only if it has NF — handled in processData
-const LOJA_COLORS={'BARRA SHOPPING':'#E24B4A','BOTAFOGO':'#185FA5','BENFICA':'#854F0B','CERQUEIRA CESAR':'#3C3489','HIGIENOPOLIS':'#27500A','ICARAIRJ':'#0C447C','IPANEMA':'#639922','LEBLON':'#A32D2D','PINHEIROS':'#1D9E75','RIO SUL':'#888780','TIJUCA':'#D85A30'};
 
 function ns(s){return String(s||'').toUpperCase().replace(/[ÀÁÂÃÄ]/g,'A').replace(/[ÇĆ]/g,'C').replace(/[ÈÉÊË]/g,'E').replace(/[ÌÍÎÏ]/g,'I').replace(/[ÒÓÔÕÖ]/g,'O').replace(/[ÙÚÛÜ]/g,'U').replace(/[^A-Z0-9]/g,'');}
 function isFat(s){return STATUS_FAT.includes(ns(s));}
 function isAprovacao(s){return ns(s).includes('APROVACAO');}
 function isCan(c){return String(c||'').toUpperCase().includes('CANCELADO TOTAL');}
-function isRupt(o){return String(o||'').toLowerCase().includes('processo automatico de divergencia');}
 function isSusp(s){const v=String(s||'').toLowerCase().trim();return v==='true'||v==='verdadeiro'||v==='1';}
-function normLoja(s){s=String(s||'').trim().toUpperCase();if(!s||s==='NAN')return'BENFICA';return s.replace(/^E-COMMERCE\s*/,'').trim()||'BENFICA';}
+function normLoja(s){
+  s=String(s||'').trim().toUpperCase();
+  if(!s||s==='NAN')return'BENFICA';
+  s=s.replace(/^E-COMMERCE\s*/,'').trim()||'BENFICA';
+  if(s==='CD BENFICA')return'BENFICA';
+  return s;
+}
 
 function toDateTime(v){
   if(v===null||v===undefined||v==='')return null;
-  // Excel serial number (raw:true gives these for date cells)
-  if(typeof v==='number'){
-    if(v>1&&v<400000){
-      // Excel epoch: Dec 30 1899 UTC. Preserve local time by using local Date constructor.
-      const d=new Date(Date.UTC(1899,11,30)+Math.round(v)*86400000);
-      // For datetime serials with fractional days, add the time portion
-      const frac=v-Math.floor(v);
-      if(frac>0){const secs=Math.round(frac*86400);return new Date(d.getTime()+secs*1000);}
-      return d;
-    }
-    return null;
-  }
   if(v instanceof Date)return isNaN(v.getTime())?null:v;
+  if(typeof v==='number'&&v>1&&v<400000){
+    const day=Math.floor(v);
+    const frac=v-day;
+    const base=new Date(Date.UTC(1899,11,30)+day*86400000);
+    if(frac>0){const secs=Math.round(frac*86400);return new Date(base.getTime()+secs*1000);}
+    return base;
+  }
   if(typeof v==='string'){
     const s=v.trim();if(!s)return null;
-    // ISO format: 2026-05-06 or 2026-05-06 16:08:21
     const iso=s.match(/^(\d{4})-(\d{2})-(\d{2})(?:[T ](\d{2}):(\d{2}):(\d{2}))?/);
     if(iso)return new Date(+iso[1],+iso[2]-1,+iso[3],+(iso[4]||0),+(iso[5]||0),+(iso[6]||0));
-    // US format: 5/6/2026 or 5/6/2026 4:08:21 PM
     const us=s.match(/^(\d{1,2})\/(\d{1,2})\/(\d{4})(?:\s+(\d{1,2}):(\d{2}):(\d{2})\s*(AM|PM)?)?/i);
     if(us){let h=+(us[4]||0);if(us[7]&&us[7].toUpperCase()==='PM'&&h<12)h+=12;if(us[7]&&us[7].toUpperCase()==='AM'&&h===12)h=0;return new Date(+us[3],+us[2]-1,+us[1],h,+(us[5]||0),+(us[6]||0));}
-    // BR format: 06/05/2026
-    const br=s.match(/^(\d{2})\/(\d{2})\/(\d{4})/);
-    if(br)return new Date(+br[3],+br[2]-1,+br[1]);
   }
   return null;
 }
+
 function fmtDT(d){if(!d)return'—';return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0')+' '+String(d.getHours()).padStart(2,'0')+'h'+String(d.getMinutes()).padStart(2,'0');}
 function fmtD(d){if(!d)return'—';return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'2-digit',year:'numeric'});}
 function fmtDshort(d){if(!d)return'—';return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');}
 function fmtH(h){if(h===null||h===undefined)return'—';if(h>=24)return Math.floor(h/24)+'d '+Math.round(h%24)+'h';return Math.round(h)+'h';}
 function parseHoras(h){if(!h)return null;const m=String(h).match(/(\d+)h(\d+)m/);return m?+m[1]+m[2]/60:null;}
 function toNum(v){try{return parseFloat(String(v).replace(',','.'));}catch{return 0;}}
-function extractCore(mkt){if(!mkt)return null;const m=String(mkt).match(/(\d{10,})/);return m?m[1].slice(-7):null;}
-function vtxNum(p){const m=String(p).match(/VTX-(\d+)-/);return m?m[1]:null;}
 function fmtCliente(s){return String(s||'').trim().replace(/^\d+\s*-\s*/,'').trim().slice(0,28)||'—';}
 function findCol(keys,candidates){
-  // Try exact match first, then partial
   for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim()===c.toLowerCase());if(f)return f;}
   for(const c of candidates){const f=keys.find(k=>k.toLowerCase().trim().includes(c.toLowerCase()));if(f)return f;}
   return null;
+}
+
+function pedidoCell(pedido,slr,loja){
+  const linkId=slr&&slr.startsWith('SLR-')?slr:pedido;
+  const base=VTEX_URLS[loja];
+  if(!base)return`<span style="font-weight:500;font-size:11px">${pedido}</span>`;
+  return`<a href="${base}/${encodeURIComponent(linkId)}" target="_blank" rel="noopener" style="font-weight:500;font-size:11px;color:#1a1a18;text-decoration:none;border-bottom:1px dotted #aaa" title="Abrir na VTEX">${pedido}</a>`;
 }
 
 function processData(rows,filename){
@@ -323,8 +307,12 @@ function processData(rows,filename){
     const desc=String(r['Desc Tipo Pedido']||'').toUpperCase();
     const ped=String(r['Pedido']||'').toUpperCase();
     const susp=r['Suspenso']||r['suspenso']||'';
-    return !desc.includes('ENCOMENDA')&&!ped.startsWith('OMNI')&&!isSusp(susp);
+    if(desc.includes('ENCOMENDA')||ped.startsWith('OMNI')||isSusp(susp))return false;
+    const stat=String(r['Status Workflow']||'');
+    if(isAprovacao(stat))return false;
+    return true;
   });
+
   const keys=rows.length?Object.keys(rows[0]):[];
   const C={
     pedido:findCol(keys,['Pedido'])||'Pedido',
@@ -333,7 +321,6 @@ function processData(rows,filename){
     cancel:findCol(keys,['Cancelado'])||'Cancelado',
     obs:findCol(keys,['Obs'])||'Obs',
     mkt:findCol(keys,['Pedido Marketplace'])||'Pedido Marketplace',
-    frete:findCol(keys,['tipo frete','tipo_frete']),
     digit:findCol(keys,['data digitação','data digitacao']),
     emis:findCol(keys,['data de emissão','data de emissao']),
     nota:findCol(keys,['data hora nota','hora nota']),
@@ -344,14 +331,14 @@ function processData(rows,filename){
     slr:findCol(keys,['n. pedido cliente','n pedido cliente']),
     qtdePed:findCol(keys,['qtde pedido']),
     qtdeEnt:findCol(keys,['qtde entregue']),
+    frete:findCol(keys,['tipo frete','tipo_frete']),
   };
+
   DATA=rows.filter(r=>String(r[C.pedido]||'').trim().length>3).map(r=>{
     const pedido=String(r[C.pedido]||'').trim();
     const status=String(r[C.status]||'').trim();
-    const _fatBase=isFat(status);
-    const _hasNF=!!(C.nfdata&&r[C.nfdata]&&String(r[C.nfdata]).trim()!=='');
-    const fat=_fatBase||(isAprovacao(status)&&_hasNF);
-    const can=isCan(r[C.cancel]||''),rupt=isRupt(r[C.obs]||'');
+    const fat=isFat(status);
+    const can=isCan(r[C.cancel]||'');
     const mkt=String(r[C.mkt]||'').trim();
     const dtE=toDateTime(C.digit?r[C.digit]:null)||toDateTime(C.emis?r[C.emis]:null);
     const dtN=toDateTime(C.nota?r[C.nota]:null)||toDateTime(C.nfdata?r[C.nfdata]:null);
@@ -362,37 +349,52 @@ function processData(rows,filename){
     const qp=toNum(C.qtdePed?r[C.qtdePed]:0),qe=toNum(C.qtdeEnt?r[C.qtdeEnt]:0);
     const pp=fat&&qp>0&&qe<qp;
     const aging=(!fat&&!can&&dtE)?(LOAD_TIME-dtE)/3600000:null;
-    return{pedido,tipo:pedido.startsWith('VTX')?'VTX':'REALOCADO',
-      loja:normLoja(r[C.desc]||''),status,fat,can,rupt,mkt,
-      dtE,dtN,dtD,hf,aging,pp,
+    return{
+      pedido,tipo:pedido.startsWith('VTX')?'VTX':'REALOCADO',
+      loja:normLoja(r[C.desc]||''),status,fat,can,mkt,
+      pend:can||(fat&&pp),pendCan:can,pendParc:fat&&pp,
+      dtE,dtN,dtD,hf,aging,
       slr:C.slr?String(r[C.slr]||''):'',
       cliente:C.cliente?fmtCliente(r[C.cliente]):'—',
       frete:C.frete?String(r[C.frete]||'').trim():'',
-      vtxNum:vtxNum(pedido),mktCore:extractCore(mkt)};
+    };
   });
+
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify({filename:filename||'arquivo',savedAt:new Date().toISOString(),rows:rows.slice(0,6000)}));}catch(e){}
   renderAll(filename);
 }
 
 function renderAll(filename){
+  document.getElementById('loadingBanner').style.display='none';
   document.getElementById('uploadZone').style.display='none';
   document.getElementById('dash').style.display='block';
   document.getElementById('btnClear').style.display='inline-block';
+
   const total=DATA.length,fat=DATA.filter(d=>d.fat).length;
   const pend=DATA.filter(d=>!d.fat&&!d.can).length;
   const crit=DATA.filter(d=>d.aging>48).length,alrt=DATA.filter(d=>d.aging>=24&&d.aging<=48).length;
-  const vtxA=DATA.filter(d=>d.tipo==='VTX'),realC=DATA.filter(d=>d.tipo==='REALOCADO').length;
-  const rc=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
-  const vt=vtxA.filter(d=>d.fat||d.can||rc.has(d.vtxNum));
-  const vp=vtxA.filter(d=>d.can||d.pp||rc.has(d.vtxNum));
-  const pp=vt.length?Math.round(vp.length/vt.length*1000)/10:0;
+  const vtxC=DATA.filter(d=>d.tipo==='VTX').length,realC=DATA.filter(d=>d.tipo==='REALOCADO').length;
+  const tratados=DATA.filter(d=>d.fat||d.can);
+  const comPend=DATA.filter(d=>d.pend);
+  const pctPend=tratados.length?Math.round(comPend.length/tratados.length*1000)/10:0;
+  const fatRows=DATA.filter(d=>d.fat&&d.hf!==null);
+  const slaP=Math.round(fatRows.filter(d=>d.hf<=24).length/Math.max(fatRows.length,1)*100);
+  const slaR=Math.round(fatRows.filter(d=>d.hf>24&&d.hf<=48).length/Math.max(fatRows.length,1)*100);
+  const slaA=Math.round(fatRows.filter(d=>d.hf>48).length/Math.max(fatRows.length,1)*100);
+
   document.getElementById('metricsRow').innerHTML=`
-    <div class="mc"><div class="ml">Total</div><div class="mv">${total.toLocaleString('pt-BR')}</div><div class="ms">${vtxA.length} VTX · ${realC} realoc.</div></div>
+    <div class="mc"><div class="ml">Total</div><div class="mv">${total.toLocaleString('pt-BR')}</div><div class="ms">${vtxC} VTX · ${realC} realoc.</div></div>
     <div class="mc"><div class="ml">Faturados</div><div class="mv vo">${fat.toLocaleString('pt-BR')}</div><div class="ms">${total?Math.round(fat/total*100):0}% do total</div></div>
     <div class="mc"><div class="ml">A faturar</div><div class="mv vw">${pend}</div><div class="ms">não faturados</div></div>
     <div class="mc mc-crit"><div class="ml">Críticos &gt;48h</div><div class="mv">${crit}</div><div class="ms">parados há +48h</div></div>
     <div class="mc mc-alrt"><div class="ml">Alerta 24–48h</div><div class="mv">${alrt}</div><div class="ms">atenção</div></div>
-    <div class="mc"><div class="ml">% Pendência</div><div class="mv">${pp}%</div><div class="ms">${vp.length} VTX afetados</div></div>`;
+    <div class="mc"><div class="ml">% Pendência</div><div class="mv">${pctPend}%</div><div class="ms">${comPend.length} pedidos afetados</div></div>`;
+
+  document.getElementById('slaInner').innerHTML=`
+    <div style="background:#eaf3de;border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#27500a">${slaP}%</div><div style="font-size:11px;color:#3b6d11;margin-top:2px">No prazo ≤24h</div><div style="font-size:11px;color:#888">${fatRows.filter(d=>d.hf<=24).length} pedidos</div></div>
+    <div style="background:#faeeda;border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#854f0b">${slaR}%</div><div style="font-size:11px;color:#854f0b;margin-top:2px">Risco 24–48h</div><div style="font-size:11px;color:#888">${fatRows.filter(d=>d.hf>24&&d.hf<=48).length} pedidos</div></div>
+    <div style="background:#fcebeb;border-radius:8px;padding:12px;text-align:center"><div style="font-size:22px;font-weight:600;color:#a32d2d">${slaA}%</div><div style="font-size:11px;color:#a32d2d;margin-top:2px">Atrasou &gt;48h</div><div style="font-size:11px;color:#888">${fatRows.filter(d=>d.hf>48).length} pedidos</div></div>`;
+
   const datas=DATA.filter(d=>d.dtE).map(d=>d.dtE.getTime());
   if(datas.length){
     const mn=new Date(Math.min(...datas)),mx=new Date(Math.max(...datas));
@@ -400,55 +402,127 @@ function renderAll(filename){
     document.getElementById('subtitle').textContent=`${total.toLocaleString('pt-BR')} pedidos · ${filename||''}`;
   }
   document.getElementById('savedBanner').style.display='flex';
-  document.getElementById('savedMsg').textContent=`Dados salvos · ${filename||''} · ${new Date().toLocaleString('pt-BR')}`;
+  document.getElementById('savedMsg').textContent=`Dados carregados · ${filename||''} · ${new Date().toLocaleString('pt-BR')}`;
+
   const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
   const fl=document.getElementById('fL');fl.innerHTML='<option value="">Todas</option>';
   lojas.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;fl.appendChild(o);});
   const sts=[...new Set(DATA.filter(d=>!d.fat&&!d.can).map(d=>d.status).filter(s=>s&&s!=='nan'))].sort();
   const fs=document.getElementById('fS');fs.innerHTML='<option value="">Todos</option>';
   sts.forEach(s=>{const o=document.createElement('option');o.value=s;o.textContent=s;fs.appendChild(o);});
-  // Faturados filters
   const flf=document.getElementById('fLF');if(flf){flf.innerHTML='<option value="">Todas</option>';lojas.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;flf.appendChild(o);});}
   const fretes=[...new Set(DATA.filter(d=>d.fat&&d.frete).map(d=>d.frete))].sort();
   const fff=document.getElementById('fFrete');if(fff){fff.innerHTML='<option value="">Todos</option>';fretes.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fff.appendChild(o);});}
-  rL();rF();rPend();rSLA();
+
+  rL();rF();rPend();
   document.getElementById('ts').textContent='Processado em: '+new Date().toLocaleString('pt-BR');
 }
 
+// ---- HELPERS ----
 function sb(s){
   const u=ns(s);
   if(u.includes('FATURAMENTO'))return'<span class="b bwn">Ag. Fat.</span>';
   if(u.includes('CONFIRMACAO'))return'<span class="b bif">Ag. Conf.</span>';
-  if(u.includes('APROVACAO'))return'<span class="b bpp">Ag. Aprov.</span>';
   if(u.includes('EMBARQUE'))return'<span class="b bok">Ag. Embarque</span>';
   if(u==='ENTREGUE')return'<span class="b bok">Entregue</span>';
   return`<span class="b bnt">${s||'—'}</span>`;
 }
 function ac(a){return a>48?'bdg':a>=24?'bwn':'bok';}
 function as2(a){return a>48?'<span class="b bdg">Crítico</span>':a>=24?'<span class="b bwn">Alerta</span>':'<span class="b bok">Normal</span>';}
+function slaBadge(h){if(h>48)return'<span class="b bdg">Atrasou</span>';if(h>=24)return'<span class="b bwn">Risco</span>';return'<span class="b bok">No prazo</span>';}
+function hColor(h){return h>48?'#a32d2d':h>=24?'#854f0b':'#27500a';}
 
-// ---- PEDIDOS MODE ----
-let pedidoMode='afaturar';
-function setPedidoMode(m){
-  pedidoMode=m;
-  const isDark=m==='afaturar';
-  document.getElementById('tgl-afaturar').style.background=isDark?'#1a1a18':'transparent';
-  document.getElementById('tgl-afaturar').style.color=isDark?'#fff':'#888780';
-  document.getElementById('tgl-faturados').style.background=isDark?'transparent':'#1a1a18';
-  document.getElementById('tgl-faturados').style.color=isDark?'#888780':'#fff';
-  document.getElementById('view-afaturar').style.display=m==='afaturar'?'block':'none';
-  document.getElementById('view-faturados').style.display=m==='faturados'?'block':'none';
-  if(m==='faturados') rFat();
+// ---- LOJAS ----
+let sCol='media_h',sDir=1;
+function sL(col){
+  if(sCol===col)sDir*=-1;else{sCol=col;sDir=1;}
+  document.querySelectorAll('#ltable th').forEach(t=>t.classList.remove('sa','sd'));
+  const m={loja:0,total:1,pct_fat:2,a_faturar:3,media_h:4,pct_pend:6};
+  if(m[col]!==undefined)document.querySelectorAll('#ltable th')[m[col]].classList.add(sDir===1?'sa':'sd');
+  rL();
+}
+function rL(){
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const now7=new Date(LOAD_TIME.getTime()-7*86400000);
+  const now14=new Date(LOAD_TIME.getTime()-14*86400000);
+  const stats=lojas.map(l=>{
+    const g=DATA.filter(d=>d.loja===l);
+    const fatG=g.filter(d=>d.fat&&d.hf!==null);
+    const medH=fatG.length?fatG.reduce((s,d)=>s+d.hf,0)/fatG.length:null;
+    const af=g.filter(d=>!d.fat&&!d.can).length;
+    const crit=g.filter(d=>d.aging>48).length,alrt=g.filter(d=>d.aging>=24&&d.aging<=48).length;
+    const trat=g.filter(d=>d.fat||d.can);
+    const pend=g.filter(d=>d.pend);
+    const pctP=trat.length?Math.round(pend.length/trat.length*1000)/10:0;
+    const prazo=Math.round(fatG.filter(d=>d.hf<=24).length/Math.max(fatG.length,1)*100);
+    const risco=Math.round(fatG.filter(d=>d.hf>24&&d.hf<=48).length/Math.max(fatG.length,1)*100);
+    const atrasou=Math.round(fatG.filter(d=>d.hf>48).length/Math.max(fatG.length,1)*100);
+    const s1=fatG.filter(d=>d.dtN&&d.dtN>=now7);
+    const s2=fatG.filter(d=>d.dtN&&d.dtN>=now14&&d.dtN<now7);
+    const a1=s1.length>=3?s1.reduce((s,d)=>s+d.hf,0)/s1.length:null;
+    const a2=s2.length>=3?s2.reduce((s,d)=>s+d.hf,0)/s2.length:null;
+    return{loja:l,total:g.length,faturados:g.filter(d=>d.fat).length,a_faturar:af,crit,alrt,
+      pct_fat:Math.round(g.filter(d=>d.fat).length/g.length*1000)/10,
+      media_h:medH,pct_pend:pctP,sla_prazo:prazo,sla_risco:risco,sla_atrasou:atrasou,a1,a2};
+  });
+  const validH=stats.filter(s=>s.media_h!==null).map(s=>s.media_h);
+  const mn=validH.length?Math.min(...validH):0,mx=validH.length?Math.max(...validH):0;
+  const sorted=[...stats].sort((a,b)=>{const va=a[sCol]??'',vb=b[sCol]??'';return typeof va==='string'?sDir*va.localeCompare(vb):sDir*(va-vb);});
+  document.getElementById('ltb').innerHTML=sorted.map(l=>{
+    const isFast=l.media_h!==null&&l.media_h===mn,isSlow=l.media_h!==null&&l.media_h===mx;
+    const hC=isFast?'td-h td-fast':isSlow?'td-h td-slow':'td-h';
+    const hB=isFast?' <span class="b bok">Mais rápida</span>':isSlow?' <span class="b bdg">Mais lenta</span>':'';
+    const fc=l.pct_fat>=93?'#27500a':l.pct_fat>=85?'#854f0b':'#a32d2d';
+    const pc=l.pct_fat>=93?'bok':l.pct_fat>=85?'bwn':'bdg';
+    const lb=l.pct_fat>=93?'Bom':l.pct_fat>=85?'Regular':'Atenção';
+    const pC=l.pct_pend>=20?'#a32d2d':l.pct_pend>=10?'#854f0b':'#1a1a18';
+    const cs=l.crit>0?` <span class="b bdg">${l.crit} crit.</span>`:'';
+    const als=l.alrt>0?` <span class="b bwn">${l.alrt} alrt.</span>`:'';
+    let trend='';
+    if(l.a1!==null&&l.a2!==null&&Math.abs(l.a1-l.a2)>2){
+      const better=l.a1<l.a2;
+      trend=`<span style="font-size:11px;margin-left:4px;color:${better?'#27500a':'#a32d2d'}">${better?'↓':'↑'}${fmtH(Math.abs(l.a1-l.a2))}</span>`;
+    }
+    const mediaStr=l.a1!==null?`<strong>${fmtH(l.a1)}</strong>${trend}`:(l.media_h!==null?fmtH(l.media_h):'—');
+    const slaBar=`<div style="display:flex;align-items:center;gap:6px">
+      <div style="width:70px;height:8px;border-radius:99px;overflow:hidden;display:flex;flex-shrink:0" title="No prazo: ${l.sla_prazo}% · Risco: ${l.sla_risco}% · Atrasou: ${l.sla_atrasou}%">
+        <div style="width:${l.sla_prazo}%;background:#4CAF50"></div>
+        <div style="width:${l.sla_risco}%;background:#F5A623"></div>
+        <div style="width:${l.sla_atrasou}%;background:#E24B4A"></div>
+      </div>
+      <span style="font-size:11px;font-weight:500;color:${l.sla_prazo>=70?'#27500a':l.sla_prazo>=50?'#854f0b':'#a32d2d'}">${l.sla_prazo}%</span>
+    </div>
+    <div style="font-size:10px;color:#aaa;margin-top:1px">prazo · risco · atrasou</div>`;
+    return`<tr>
+      <td style="font-weight:500">${l.loja}</td><td>${l.total}</td>
+      <td><span class="pct-fat" style="color:${fc}">${l.pct_fat}%</span> <span style="font-size:11px;color:#aaa">(${l.faturados})</span></td>
+      <td><div class="af-wrap">${l.a_faturar}${cs}${als}</div></td>
+      <td class="${hC}" style="white-space:nowrap">${mediaStr}${hB}</td>
+      <td>${slaBar}</td>
+      <td><span style="font-weight:500;color:${pC}">${l.pct_pend>0?l.pct_pend+'%':'—'}</span></td>
+      <td><span class="b ${pc}">${lb}</span></td>
+    </tr>`;
+  }).join('');
 }
 
+// ---- A FATURAR ----
+let agingFilter='';
+function setAging(v){
+  agingFilter=v;
+  document.querySelectorAll('.atg').forEach(b=>{
+    const onclick=b.getAttribute('onclick')||'';
+    b.classList.toggle('on',onclick.includes("'"+v+"'"));
+  });
+  rF();
+}
 function rF(){
-  const lv=document.getElementById('fL').value,sv=document.getElementById('fS').value,av=document.getElementById('fA').value;
+  const lv=document.getElementById('fL').value,sv=document.getElementById('fS').value;
   let rows=DATA.filter(d=>!d.fat&&!d.can);
   if(lv)rows=rows.filter(d=>d.loja===lv);
   if(sv)rows=rows.filter(d=>d.status===sv);
-  if(av==='c')rows=rows.filter(d=>d.aging>48);
-  else if(av==='a')rows=rows.filter(d=>d.aging>=24&&d.aging<=48);
-  else if(av==='o')rows=rows.filter(d=>d.aging!==null&&d.aging<24);
+  if(agingFilter==='c')rows=rows.filter(d=>d.aging>48);
+  else if(agingFilter==='a')rows=rows.filter(d=>d.aging>=24&&d.aging<=48);
+  else if(agingFilter==='o')rows=rows.filter(d=>d.aging!==null&&d.aging<24);
   rows.sort((a,b)=>(b.aging||0)-(a.aging||0));
   const tb=document.getElementById('ftb'),em=document.getElementById('fem');
   if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
@@ -456,38 +530,44 @@ function rF(){
   const now=new Date();
   tb.innerHTML=rows.map(r=>{
     const prazoPast=r.dtD&&r.dtD<now;
-    const prazoBadge=prazoPast?'<span class="b bdg" style="margin-left:4px">Prazo vencido</span>':'';
+    const pvBadge=prazoPast?'<span class="b bdg" style="margin-left:4px;font-size:10px">Prazo vencido</span>':'';
     return`<tr class="${(r.aging||0)>48?'alr':''}">
-    <td>${pedidoCell(r.pedido,r.slr,r.loja)}</td>
-    <td style="font-size:11px;color:#888780">${r.slr||'—'}</td>
-    <td style="font-size:12px">${r.cliente}</td>
-    <td>${r.tipo==='REALOCADO'?'<span class="b bpp">Realocado</span>':'<span class="b bnt">VTX</span>'}</td>
-    <td>${r.loja}</td><td>${sb(r.status)}</td>
-    <td style="font-size:11px;color:#888780">${r.frete||'—'}</td>
-    <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtE)}</td>
-    <td style="color:#888780">${fmtD(r.dtD)}${prazoBadge}</td>
-    <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
-    <td>${as2(r.aging||0)}</td>
-  </tr>`;}).join('');
+      <td>${pedidoCell(r.pedido,r.slr,r.loja)}</td>
+      <td style="font-size:11px;color:#888780">${r.slr||'—'}</td>
+      <td style="font-size:12px">${r.cliente}</td>
+      <td>${r.tipo==='REALOCADO'?'<span class="b bpp">Realocado</span>':'<span class="b bnt">VTX</span>'}</td>
+      <td>${r.loja}</td><td>${sb(r.status)}</td>
+      <td style="font-size:11px;color:#888780">${r.frete||'—'}</td>
+      <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtE)}</td>
+      <td style="color:#888780">${fmtD(r.dtD)}${pvBadge}</td>
+      <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
+      <td>${as2(r.aging||0)}</td>
+    </tr>`;
+  }).join('');
 }
 
-function hBadge(h){
-  if(h>48) return'<span class="b bdg">Atrasou</span>';
-  if(h>=24) return'<span class="b bwn">Risco</span>';
-  return'<span class="b bok">No prazo</span>';
+// ---- FATURADOS ----
+let pedidoMode='af';
+function setPedidoMode(m){
+  pedidoMode=m;
+  document.getElementById('tgl-af').style.background=m==='af'?'#1a1a18':'transparent';
+  document.getElementById('tgl-af').style.color=m==='af'?'#fff':'#888780';
+  document.getElementById('tgl-fat').style.background=m==='fat'?'#1a1a18':'transparent';
+  document.getElementById('tgl-fat').style.color=m==='fat'?'#fff':'#888780';
+  document.getElementById('view-af').style.display=m==='af'?'block':'none';
+  document.getElementById('view-fat').style.display=m==='fat'?'block':'none';
+  if(m==='fat')rFat();
 }
-function hColor(h){return h>48?'#a32d2d':h>=24?'#854f0b':'#27500a';}
-
 function rFat(){
-  const lv=document.getElementById('fLF')?document.getElementById('fLF').value:'';
-  const fv=document.getElementById('fFrete')?document.getElementById('fFrete').value:'';
-  const tv=document.getElementById('fTF')?document.getElementById('fTF').value:'';
+  const lv=document.getElementById('fLF').value;
+  const fv=document.getElementById('fFrete').value;
+  const tv=document.getElementById('fTF').value;
   let rows=DATA.filter(d=>d.fat&&d.hf!==null);
   if(lv)rows=rows.filter(d=>d.loja===lv);
   if(fv)rows=rows.filter(d=>d.frete===fv);
   if(tv==='c')rows=rows.filter(d=>d.hf>48);
-  else if(tv==='a')rows=rows.filter(d=>d.hf>=24&&d.hf<=48);
-  else if(tv==='o')rows=rows.filter(d=>d.hf<24);
+  else if(tv==='a')rows=rows.filter(d=>d.hf>24&&d.hf<=48);
+  else if(tv==='o')rows=rows.filter(d=>d.hf<=24);
   rows.sort((a,b)=>b.hf-a.hf);
   const tb=document.getElementById('fatTb'),em=document.getElementById('fatEm');
   if(!rows.length){tb.innerHTML='';em.style.display='block';return;}
@@ -500,175 +580,79 @@ function rFat(){
     <td>${r.loja}</td><td>${sb(r.status)}</td>
     <td style="font-size:11px;color:#888780">${r.frete||'—'}</td>
     <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtE)}</td>
-    <td style="color:#888780;white-space:nowrap">${r.dtN?fmtDT(r.dtN):'—'}</td>
+    <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtN)}</td>
     <td><span style="font-weight:600;color:${hColor(r.hf)}">${fmtH(r.hf)}</span></td>
-    <td>${hBadge(r.hf)}</td>
+    <td>${slaBadge(r.hf)}</td>
   </tr>`).join('');
 }
 
-// ============================================================
-// SLA SUMMARY CARD
-// ============================================================
-function rSLA(){
-  const fat=DATA.filter(d=>d.fat&&d.hf!==null);
-  if(!fat.length) return;
-  const noPrazo=fat.filter(d=>d.hf<=24).length;
-  const risco=fat.filter(d=>d.hf>24&&d.hf<=48).length;
-  const atrasou=fat.filter(d=>d.hf>48).length;
-  const total=fat.length;
-  const el=document.getElementById('slaCard');
-  if(!el) return;
-  const pct=v=>Math.round(v/total*100);
-  el.innerHTML=`
-    <div style="display:flex;gap:12px;flex-wrap:wrap">
-      <div style="flex:1;min-width:80px;text-align:center;padding:10px 8px;background:#EAF3DE;border-radius:8px">
-        <div style="font-size:22px;font-weight:600;color:#27500A">${pct(noPrazo)}%</div>
-        <div style="font-size:11px;color:#3B6D11;margin-top:2px">No prazo</div>
-        <div style="font-size:11px;color:#888;margin-top:1px">${noPrazo} pedidos</div>
-      </div>
-      <div style="flex:1;min-width:80px;text-align:center;padding:10px 8px;background:#FAEEDA;border-radius:8px">
-        <div style="font-size:22px;font-weight:600;color:#854F0B">${pct(risco)}%</div>
-        <div style="font-size:11px;color:#854F0B;margin-top:2px">Risco</div>
-        <div style="font-size:11px;color:#888;margin-top:1px">${risco} pedidos</div>
-      </div>
-      <div style="flex:1;min-width:80px;text-align:center;padding:10px 8px;background:#FCEBEB;border-radius:8px">
-        <div style="font-size:22px;font-weight:600;color:#A32D2D">${pct(atrasou)}%</div>
-        <div style="font-size:11px;color:#A32D2D;margin-top:2px">Atrasou</div>
-        <div style="font-size:11px;color:#888;margin-top:1px">${atrasou} pedidos</div>
-      </div>
-    </div>`;
-}
-
-let sCol='media_h',sDir=1;
-function sL(col){
-  if(sCol===col)sDir*=-1;else{sCol=col;sDir=1;}
-  document.querySelectorAll('#ltable th').forEach(t=>t.classList.remove('sa','sd'));
-  const m={loja:0,total:1,pct_fat:2,a_faturar:3,media_h:4,pct_pend:5};
-  if(m[col]!==undefined)document.querySelectorAll('#ltable th')[m[col]].classList.add(sDir===1?'sa':'sd');
-  rL();
-}
-function rL(){
-  const rc=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
-  const vtxA=DATA.filter(d=>d.tipo==='VTX');
-  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
-  const stats=lojas.map(l=>{
-    const g=DATA.filter(d=>d.loja===l);
-    const vg=vtxA.filter(d=>d.loja===l);
-    const vt=vg.filter(d=>d.fat||d.can||rc.has(d.vtxNum));
-    const vp=vg.filter(d=>d.can||d.pp||rc.has(d.vtxNum));
-    const fr=g.filter(d=>d.fat&&d.hf!==null);
-    return{loja:l,total:g.length,faturados:g.filter(d=>d.fat).length,
-      a_faturar:g.filter(d=>!d.fat&&!d.can).length,
-      crit:g.filter(d=>d.aging!==null&&d.aging>48).length,
-      alrt:g.filter(d=>d.aging!==null&&d.aging>=24&&d.aging<=48).length,
-      cancelados:g.filter(d=>d.can).length,
-      pct_fat:Math.round(g.filter(d=>d.fat).length/g.length*1000)/10,
-      media_h:fr.length?fr.reduce((s,d)=>s+d.hf,0)/fr.length:null,
-      pct_pend:vt.length?Math.round(vp.length/vt.length*1000)/10:0};
-  });
-  const vh=stats.filter(s=>s.media_h!==null).map(s=>s.media_h);
-  const mn=vh.length?Math.min(...vh):0,mx=vh.length?Math.max(...vh):0;
-  const sorted=[...stats].sort((a,b)=>{const va=a[sCol]??'',vb=b[sCol]??'';return typeof va==='string'?sDir*va.localeCompare(vb):sDir*(va-vb);});
-  document.getElementById('ltb').innerHTML=sorted.map(l=>{
-    const isFast=l.media_h!==null&&l.media_h===mn,isSlow=l.media_h!==null&&l.media_h===mx;
-    const hC=isFast?'td-h td-fast':isSlow?'td-h td-slow':'td-h';
-    const hB=isFast?' <span class="b bok">Mais r\u00e1pida</span>':isSlow?' <span class="b bdg">Mais lenta</span>':'';
-    const fc=l.pct_fat>=93?'#27500a':l.pct_fat>=85?'#854f0b':'#a32d2d';
-    const pc=l.pct_fat>=93?'bok':l.pct_fat>=85?'bwn':'bdg';
-    const lb=l.pct_fat>=93?'Bom':l.pct_fat>=85?'Regular':'Aten\u00e7\u00e3o';
-    const pC=l.pct_pend>=20?'#a32d2d':l.pct_pend>=10?'#854f0b':'#1a1a18';
-    const cs=l.crit>0?' <span class="b bdg">'+l.crit+' crit.</span>':'';
-    const als=l.alrt>0?' <span class="b bwn">'+l.alrt+' alrt.</span>':'';
-    const now7t=new Date(LOAD_TIME.getTime()-7*86400000);
-    const now14t=new Date(LOAD_TIME.getTime()-14*86400000);
-    const gL=DATA.filter(d=>d.loja===l.loja&&d.fat&&d.hf!==null&&d.dtN);
-    const s1=gL.filter(d=>d.dtN>=now7t);
-    const s2=gL.filter(d=>d.dtN>=now14t&&d.dtN<now7t);
-    const a1=s1.length?s1.reduce((s,d)=>s+d.hf,0)/s1.length:null;
-    const a2=s2.length?s2.reduce((s,d)=>s+d.hf,0)/s2.length:null;
-    let trend='';
-    if(a1!==null&&a2!==null&&Math.abs(a1-a2)>2){
-      const better=a1<a2;
-      trend='<span style="font-size:11px;margin-left:4px;color:'+(better?'#27500a':'#a32d2d')+';">'+(better?'\u2193':'\u2191')+fmtH(Math.abs(a1-a2))+'</span>';
-    }
-    const cF=s1.length>=3?Math.round(s1.filter(d=>d.hf>48).length/s1.length*100):null;
-    const cFstr=cF!==null?'<span style="font-size:10px;color:'+(cF>30?'#a32d2d':cF>15?'#854f0b':'#888')+';margin-left:6px">'+cF+'% atras. 7d</span>':'';
-    const mediaStr=a1!==null?'<strong>'+fmtH(a1)+'</strong>'+trend+(a2!==null?' <span style="font-size:10px;color:#aaa">vs '+fmtH(a2)+'</span>':''):(l.media_h!==null?fmtH(l.media_h):'\u2014');
-    // Compact tempo médio cell: média 7d + tendência + % atrasados
-    const tempoCell='<div style="line-height:1.4">'+
-      '<span class="'+hC+'" style="white-space:nowrap">'+mediaStr+hB+'</span>'+
-      (cFstr?'<div style="margin-top:2px">'+cFstr+'</div>':'')+
-      '</div>';
-    return '<tr><td style="font-weight:500">'+l.loja+'</td><td>'+l.total+'</td>'+
-      '<td><span class="pct-fat" style="color:'+fc+'">'+l.pct_fat+'%</span> <span style="font-size:11px;color:#aaa">('+l.faturados+')</span></td>'+
-      '<td><div class="af-wrap">'+l.a_faturar+cs+als+'</div></td>'+
-      '<td>'+tempoCell+'</td>'+
-      '<td><span style="font-weight:500;color:'+pC+'">'+(l.pct_pend>0?l.pct_pend+'%':'\u2014')+'</span></td>'+
-      '<td><span class="b '+pc+'">'+lb+'</span></td></tr>';
-  }).join('');
-}
-
+// ---- PENDÊNCIA ----
 function rPend(){
-  const rc=new Set(DATA.filter(d=>d.rupt).map(d=>d.mktCore).filter(Boolean));
-  const vtxA=DATA.filter(d=>d.tipo==='VTX');
-  const lojas=[...new Set(vtxA.map(d=>d.loja))].sort();
-  const pl=lojas.map(l=>{
-    const g=vtxA.filter(d=>d.loja===l);
-    const trat=g.filter(d=>d.fat||d.can||rc.has(d.vtxNum)).length;
-    const cr=g.filter(d=>d.can||d.pp||rc.has(d.vtxNum)).length;
-    return{l,trat,cr,pct:trat?Math.round(cr/trat*1000)/10:0};
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const pendByLoja=lojas.map(l=>{
+    const g=DATA.filter(d=>d.loja===l);
+    const trat=g.filter(d=>d.fat||d.can);
+    const pend=g.filter(d=>d.pend);
+    return{l,trat:trat.length,cr:pend.length,pct:trat.length?Math.round(pend.length/trat.length*1000)/10:0,
+      can:pend.filter(d=>d.pendCan).length,parc:pend.filter(d=>d.pendParc).length};
   }).filter(x=>x.cr>0).sort((a,b)=>b.pct-a.pct);
-  const maxP=pl.length?pl[0].pct:1;
-  document.getElementById('pendList').innerHTML=pl.map(x=>{
+
+  const maxP=pendByLoja.length?pendByLoja[0].pct:1;
+  document.getElementById('pendList').innerHTML=pendByLoja.map(x=>{
     const color=x.pct>=20?'#e24b4a':x.pct>=10?'#ba7517':'#639922';
-    return`<div class="rrow"><span style="font-size:12px">${x.l}</span>
+    return`<div class="rrow">
+      <span style="font-size:12px">${x.l}</span>
       <span style="display:flex;align-items:center;gap:6px">
         <span style="width:80px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.pct/maxP*100,100)}%;background:${color};border-radius:99px"></span></span>
         <span style="font-weight:500;color:${color};min-width:36px;text-align:right;font-size:12px">${x.pct}%</span>
         <span style="font-size:11px;color:#aaa">(${x.cr}/${x.trat})</span>
-      </span></div>`;
+        <span style="font-size:10px;color:#aaa">${x.can}can+${x.parc}parc</span>
+      </span>
+    </div>`;
   }).join('')||'<p style="font-size:13px;color:#aaa;text-align:center;padding:16px">Nenhuma pendência identificada.</p>';
 
   // Realocados pendentes
-  const rp=DATA.filter(d=>d.tipo==='REALOCADO'&&d.rupt&&!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
+  const rp=DATA.filter(d=>d.tipo==='REALOCADO'&&!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
   if(rp.length){
     document.getElementById('realCard').style.display='block';
     document.getElementById('rtb').innerHTML=rp.map(r=>`<tr class="${(r.aging||0)>48?'alr':''}">
       <td style="font-weight:500;font-size:11px">${r.pedido}</td><td>${r.loja}</td><td>${sb(r.status)}</td>
       <td style="font-size:11px;color:#888780">${r.mkt||'—'}</td>
-      <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td></tr>`).join('');
+      <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
+    </tr>`).join('');
   }
 
-  // Build chart data from DATA
-  const pendVtx=DATA.filter(d=>d.tipo==='VTX'&&(d.can||d.pp)&&d.dtE);
+  // Chart
+  const pendRows=DATA.filter(d=>d.pend&&d.dtE);
   const dateMap={};
-  pendVtx.forEach(d=>{
-    const key=d.dtE.getFullYear()+'-'+String(d.dtE.getMonth()+1).padStart(2,'0')+'-'+String(d.dtE.getDate()).padStart(2,'0');
+  pendRows.forEach(d=>{
+    const key=String(d.dtE.getDate()).padStart(2,'0')+'/'+String(d.dtE.getMonth()+1).padStart(2,'0');
     if(!dateMap[key])dateMap[key]={};
     dateMap[key][d.loja]=(dateMap[key][d.loja]||0)+1;
   });
-  const allDates=Object.keys(dateMap).sort();
-  const allLojasChart=[...new Set(pendVtx.map(d=>d.loja))].sort();
-  const series={};
-  allLojasChart.forEach(l=>{series[l]=allDates.map(dt=>dateMap[dt][l]||0);});
-  const totalsChart=allLojasChart.map(l=>series[l].reduce((a,b)=>a+b,0));
-  const top5=allLojasChart.slice().sort((a,b)=>totalsChart[allLojasChart.indexOf(b)]-totalsChart[allLojasChart.indexOf(a)]).slice(0,5);
+  const allDates=[...new Set(pendRows.map(d=>String(d.dtE.getDate()).padStart(2,'0')+'/'+String(d.dtE.getMonth()+1).padStart(2,'0')))].sort((a,b)=>{
+    const [da,ma]=a.split('/').map(Number);const [db,mb]=b.split('/').map(Number);
+    return ma!==mb?ma-mb:da-db;
+  });
+  const allLojasChart=[...new Set(pendRows.map(d=>d.loja))].sort();
+  const chartSeries={};
+  allLojasChart.forEach(l=>{chartSeries[l]=allDates.map(dt=>dateMap[dt]?dateMap[dt][l]||0:0);});
+  const totals=allLojasChart.map(l=>chartSeries[l].reduce((a,b)=>a+b,0));
+  const top5=allLojasChart.slice().sort((a,b)=>totals[allLojasChart.indexOf(b)]-totals[allLojasChart.indexOf(a)]).slice(0,5);
   activeLojaSet=new Set(top5);
-  buildChartFilters(allLojasChart,{dates:allDates,series});
-  drawPendChart({dates:allDates,series},allLojasChart);
+  buildChartFilters(allLojasChart,{dates:allDates,series:chartSeries});
+  drawPendChart({dates:allDates,series:chartSeries},allLojasChart);
 }
 
 function buildChartFilters(lojas,chartData){
   const container=document.getElementById('lojaFilters');
   container.innerHTML='';
   lojas.forEach(l=>{
-    const c=LOJA_COLORS[l]||'#888';
-    const active=activeLojaSet.has(l);
+    const c=LOJA_COLORS[l]||'#888',active=activeLojaSet.has(l);
     const btn=document.createElement('button');
-    btn.className='lbtn';
+    btn.className='lbtn';btn.title=l;
     btn.style.cssText=`border:1px solid ${c};background:${active?c:'transparent'};color:${active?'#fff':c}`;
     btn.textContent=l.split(' ').map(w=>w[0]).join('').slice(0,3);
-    btn.title=l;
     btn.onclick=()=>{
       if(activeLojaSet.has(l)){activeLojaSet.delete(l);btn.style.background='transparent';btn.style.color=c;}
       else{activeLojaSet.add(l);btn.style.background=c;btn.style.color='#fff';}
@@ -677,31 +661,20 @@ function buildChartFilters(lojas,chartData){
     container.appendChild(btn);
   });
 }
-
 function drawPendChart(chartData,allLojas){
   const canvas=document.getElementById('pendChart');
   if(!canvas)return;
-  if(pendChart){try{pendChart.destroy();}catch(e){}pendChart=null;}
-  // Destroy any existing chart on this canvas via Chart.js registry
-  const existing=Chart.getChart(canvas);
-  if(existing){try{existing.destroy();}catch(e){}}
-  const labels=chartData.dates.map(d=>{const p=d.split('-');return p[2]+'/'+p[1];});
-  const datasets=allLojas.filter(l=>activeLojaSet.has(l)).map(l=>({
-    label:l,data:chartData.series[l],
-    borderColor:LOJA_COLORS[l]||'#888',
-    backgroundColor:(LOJA_COLORS[l]||'#888')+'22',
-    borderWidth:2,pointRadius:2,pointHoverRadius:4,tension:0.3,fill:false
-  }));
-  pendChart=new Chart(canvas,{
-    type:'line',data:{labels,datasets},
-    options:{responsive:true,maintainAspectRatio:false,
-      interaction:{mode:'index',intersect:false},
+  const existing=Chart.getChart(canvas);if(existing)existing.destroy();
+  if(pendChart)try{pendChart.destroy();}catch(e){}
+  pendChart=new Chart(canvas,{type:'line',
+    data:{labels:chartData.dates,datasets:allLojas.filter(l=>activeLojaSet.has(l)).map(l=>({
+      label:l,data:chartData.series[l],borderColor:LOJA_COLORS[l]||'#888',
+      backgroundColor:(LOJA_COLORS[l]||'#888')+'22',borderWidth:2,pointRadius:2,pointHoverRadius:4,tension:0.3,fill:false
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
       plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>i[0].label,label:i=>` ${i.dataset.label}: ${i.raw}`}}},
-      scales:{
-        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',maxRotation:45,autoSkip:true,maxTicksLimit:16}},
-        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',precision:0,stepSize:1}}
-      }
-    }
+      scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',maxRotation:45,autoSkip:true,maxTicksLimit:18}},
+        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',precision:0,stepSize:1}}}}
   });
 }
 
@@ -709,18 +682,18 @@ function sw(n){
   const ns=['lojas','pedidos','pend'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ns[i]===n));
   ns.forEach(x=>document.getElementById('tp-'+x).classList.toggle('on',x===n));
-  if(n==='pend'&&DATA.length&&!pendChart)rPend();
+  if(n==='pend'&&DATA.length)rPend();
 }
 
 function clearData(){
   try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
   DATA=[];pendChart=null;
   document.getElementById('dash').style.display='none';
+  document.getElementById('loadingBanner').style.display='none';
   document.getElementById('uploadZone').style.display='block';
-  const banner=document.getElementById('savedBanner');
-  banner.style.display='none';banner.onclick=null;banner.style.cursor='';
+  document.getElementById('savedBanner').style.display='none';
   document.getElementById('btnClear').style.display='none';
-  document.getElementById('periodo').textContent='Sem dados';
+  document.getElementById('periodo').textContent='—';
   document.getElementById('subtitle').textContent='Faça upload do CSV/Excel exportado do Millennium';
 }
 
@@ -747,37 +720,28 @@ if(zone){
 
 window.addEventListener('load',()=>{
   document.getElementById('uploadZone').style.display='none';
-  document.getElementById('dash').style.display='none';
-  document.getElementById('savedBanner').style.display='none';
-  showLoading(true);
-
-  // Try to load pedidos.xlsx from the same server (GitHub/Vercel)
-  fetch('pedidos.xlsx', {cache:'no-store'})
-    .then(r=>{
-      if(!r.ok) throw new Error('Arquivo não encontrado');
-      return r.arrayBuffer();
-    })
+  document.getElementById('loadingBanner').style.display='block';
+  fetch('pedidos.xlsx',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw new Error('not found');return r.arrayBuffer();})
     .then(buf=>{
-      showLoading(false);
+      document.getElementById('loadingBanner').style.display='none';
       const wb=XLSX.read(buf,{type:'array',cellDates:false});
       processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:true}),'pedidos.xlsx');
     })
-    .catch(err=>{
-      showLoading(false);
-      console.warn('pedidos.xlsx não encontrado, mostrando upload manual:', err);
-      // Fall back to manual upload
+    .catch(()=>{
+      document.getElementById('loadingBanner').style.display='none';
       document.getElementById('uploadZone').style.display='block';
-      // Also check localStorage as secondary fallback
       try{
         const saved=localStorage.getItem(STORAGE_KEY);
         if(saved){
           const p=JSON.parse(saved);
           if(p&&p.rows&&p.rows.length){
-            const banner=document.getElementById('savedBanner');
-            banner.style.display='flex';
-            document.getElementById('savedMsg').textContent=`Dados locais salvos · ${p.filename} · ${new Date(p.savedAt).toLocaleString('pt-BR')} — clique para carregar`;
-            banner.style.cursor='pointer';
-            banner.onclick=()=>{banner.onclick=null;processData(p.rows,p.filename+' (cache)');};
+            document.getElementById('savedBanner').style.display='flex';
+            document.getElementById('savedMsg').textContent=`Dados salvos encontrados · ${p.filename} · ${new Date(p.savedAt).toLocaleString('pt-BR')} — clique para carregar`;
+            document.getElementById('savedBanner').onclick=()=>{
+              document.getElementById('savedBanner').onclick=null;
+              processData(p.rows,p.filename+' (cache)');
+            };
           }
         }
       }catch(e){}

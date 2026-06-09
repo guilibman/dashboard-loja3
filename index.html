@@ -64,6 +64,13 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .fr label{font-size:13px;color:#888780}
 .fr select{font-size:13px;padding:5px 10px;border-radius:6px;border:1px solid #d3d1c7;background:#fff;cursor:pointer}
 .empty{text-align:center;padding:24px;font-size:13px;color:#aaa}
+.loja-cards{display:grid;grid-template-columns:repeat(auto-fill,minmax(155px,1fr));gap:10px;margin-bottom:1.5rem}
+.loja-card{background:#fff;border:1px solid #e5e4e0;border-radius:8px;padding:14px 16px;transition:box-shadow .15s}
+.loja-card:hover{box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+.loja-card-name{font-size:12px;font-weight:700;color:#1a1a18;margin-bottom:2px}
+.loja-card-row{display:flex;justify-content:space-between;align-items:center;margin-bottom:4px;font-size:11px}
+.loja-card-label{color:#888780}
+.loja-card-val{font-weight:500;color:#1a1a18}
 .ts{font-size:11px;color:#aaa;margin-top:16px;text-align:right}
 @media(max-width:600px){.pend-layout{flex-direction:column}.mg{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -105,12 +112,12 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 <div class="tabs">
   <button class="tab on" onclick="sw('lojas')">Performance lojas</button>
   <button class="tab" onclick="sw('pedidos')">Pedidos</button>
-  <button class="tab" onclick="sw('pend')">Pendência</button>
 </div>
 
 <!-- PERFORMANCE LOJAS -->
 <div class="tp on" id="tp-lojas">
-  <p style="font-size:12px;color:#888780;margin-bottom:10px">Ordenado por tempo médio de faturamento. Clique em qualquer coluna para reordenar.</p>
+  <div class="loja-cards" id="lojaCards"></div>
+  <p style="font-size:12px;color:#888780;margin-bottom:10px">Clique em qualquer coluna para reordenar.</p>
   <div class="tw"><table id="ltable">
     <thead><tr>
       <th onclick="sL('loja')">Loja</th>
@@ -176,13 +183,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   </div>
 </div>
 
-<!-- PENDÊNCIA -->
-<div class="tp" id="tp-pend">
-  <div class="note">Pendência = pedido com Cancelamento Total ou Qtde Entregue &lt; Qtde Pedido, em qualquer pedido (VTX ou realocado). Contabilizada na loja que sinalizou a pendência.</div>
-  <div class="pend-layout">
-    <div class="card" style="min-width:240px;flex:1">
-      <div class="sl">Pendência por loja</div>
-      <p style="font-size:12px;color:#888780;margin-bottom:10px">% de pedidos tratados com ao menos 1 pendência</p>
+
+
+<div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e4e0">
+  <p style="font-size:15px;font-weight:600;color:#1a1a18;margin-bottom:4px">Análise de Pendências</p>
+  <p style="font-size:12px;color:#888780;margin-bottom:14px">Cancelamento Total ou Qtde Entregue &lt; Qtde Pedido — contabilizado na loja que sinalizou a pendência.</p>
+  <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
+    <div class="card" style="min-width:220px;flex:1">
+      <div class="sl">% pendência por loja</div>
       <div id="pendList"></div>
     </div>
     <div class="card" style="flex:2;min-width:300px">
@@ -191,9 +199,9 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
           <div class="sl" style="margin-bottom:2px">Pendências por dia</div>
           <p style="font-size:12px;color:#888780">Cancelamentos totais + parciais por loja</p>
         </div>
-        <div id="lojaFilters" style="display:flex;flex-wrap:wrap;gap:4px;max-width:300px"></div>
+        <div id="lojaFilters" style="display:flex;flex-wrap:wrap;gap:4px;max-width:280px"></div>
       </div>
-      <div style="position:relative;width:100%;height:210px">
+      <div style="position:relative;width:100%;height:200px">
         <canvas id="pendChart" role="img" aria-label="Gráfico de pendências diárias por loja"></canvas>
       </div>
     </div>
@@ -385,9 +393,28 @@ function renderAll(filename){
   document.getElementById('metricsRow').innerHTML=`
     <div class="mc"><div class="ml">Total</div><div class="mv">${total.toLocaleString('pt-BR')}</div><div class="ms">${vtxC} VTX · ${realC} realoc.</div></div>
     <div class="mc"><div class="ml">Faturados</div><div class="mv vo">${fat.toLocaleString('pt-BR')}</div><div class="ms">${total?Math.round(fat/total*100):0}% do total</div></div>
-    <div class="mc"><div class="ml">A faturar</div><div class="mv vw">${pend}</div><div class="ms">não faturados</div></div>
-    <div class="mc mc-crit"><div class="ml">Críticos &gt;48h</div><div class="mv">${crit}</div><div class="ms">parados há +48h</div></div>
-    <div class="mc mc-alrt"><div class="ml">Alerta 24–48h</div><div class="mv">${alrt}</div><div class="ms">atenção</div></div>
+    <div class="mc" style="border:.5px solid #d3d1c7">
+      <div class="ml">A faturar</div><div class="mv vw">${pend}</div>
+      <div style="display:flex;gap:8px;margin-top:6px;padding-top:6px;border-top:.5px solid #e5e4e0">
+        <span style="font-size:11px;color:#a32d2d;font-weight:500">▲ ${crit} &gt;48h</span>
+        <span style="font-size:11px;color:#854f0b;font-weight:500">● ${alrt} 24–48h</span>
+      </div>
+    </div>
+    <div class="mc" style="border:.5px solid #d3d1c7">
+      <div class="ml">SLA faturados</div>
+      <div style="display:flex;gap:4px;align-items:center;margin-top:4px">
+        <div style="flex:1;height:6px;border-radius:99px;overflow:hidden;display:flex">
+          <div style="width:${slaP}%;background:#4CAF50"></div>
+          <div style="width:${slaR}%;background:#F5A623"></div>
+          <div style="width:${slaA}%;background:#E24B4A"></div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;margin-top:5px;font-size:11px">
+        <span style="color:#27500a;font-weight:600">${slaP}% prazo</span>
+        <span style="color:#854f0b">${slaR}% risco</span>
+        <span style="color:#a32d2d">${slaA}% atrasou</span>
+      </div>
+    </div>
     <div class="mc"><div class="ml">% Pendência</div><div class="mv">${pctPend}%</div><div class="ms">${comPend.length} pedidos afetados</div></div>`;
 
   document.getElementById('slaInner').innerHTML=`
@@ -414,7 +441,7 @@ function renderAll(filename){
   const fretes=[...new Set(DATA.filter(d=>d.fat&&d.frete).map(d=>d.frete))].sort();
   const fff=document.getElementById('fFrete');if(fff){fff.innerHTML='<option value="">Todos</option>';fretes.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fff.appendChild(o);});}
 
-  rL();rF();rPend();
+  buildLojaCards();rL();rF();rPend();
   document.getElementById('ts').textContent='Processado em: '+new Date().toLocaleString('pt-BR');
 }
 
@@ -433,6 +460,75 @@ function slaBadge(h){if(h>48)return'<span class="b bdg">Atrasou</span>';if(h>=24
 function hColor(h){return h>48?'#a32d2d':h>=24?'#854f0b':'#27500a';}
 
 // ---- LOJAS ----
+function buildLojaCards(){
+  const el=document.getElementById('lojaCards');
+  if(!el)return;
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const now7=new Date(LOAD_TIME.getTime()-7*86400000);
+  const now14=new Date(LOAD_TIME.getTime()-14*86400000);
+  const validH=[];
+  // compute stats per loja for min/max
+  const statsList=lojas.map(l=>{
+    const g=DATA.filter(d=>d.loja===l);
+    const fg=g.filter(d=>d.fat&&d.hf!==null);
+    const s1=fg.filter(d=>d.dtN&&d.dtN>=now7);
+    const s2=fg.filter(d=>d.dtN&&d.dtN>=now14&&d.dtN<now7);
+    const a1=s1.length>=3?s1.reduce((s,d)=>s+d.hf,0)/s1.length:null;
+    const a2=s2.length>=3?s2.reduce((s,d)=>s+d.hf,0)/s2.length:null;
+    const medH=fg.length?fg.reduce((s,d)=>s+d.hf,0)/fg.length:null;
+    const displayH=a1||medH;
+    if(displayH)validH.push(displayH);
+    const prazo=Math.round(fg.filter(d=>d.hf<=24).length/Math.max(fg.length,1)*100);
+    const risco=Math.round(fg.filter(d=>d.hf>24&&d.hf<=48).length/Math.max(fg.length,1)*100);
+    const atrasou=Math.round(fg.filter(d=>d.hf>48).length/Math.max(fg.length,1)*100);
+    const trat=g.filter(d=>d.fat||d.can);
+    const pend=g.filter(d=>d.pend);
+    const pctP=trat.length?Math.round(pend.length/trat.length*1000)/10:0;
+    const pctFat=Math.round(g.filter(d=>d.fat).length/g.length*1000)/10;
+    return{loja:l,displayH,a1,a2,medH,prazo,risco,atrasou,pctP,pctFat};
+  });
+  const mn=validH.length?Math.min(...validH):0;
+  const mx=validH.length?Math.max(...validH):0;
+  el.innerHTML=statsList.map(l=>{
+    const pc=l.pctFat>=93?'bok':l.pctFat>=85?'bwn':'bdg';
+    const lb=l.pctFat>=93?'Bom':l.pctFat>=85?'Regular':'Atenção';
+    const hC=l.displayH&&l.displayH===mn?'#27500a':l.displayH&&l.displayH===mx?'#a32d2d':'#1a1a18';
+    const pC=l.pctP>=20?'#a32d2d':l.pctP>=10?'#854f0b':'#888780';
+    let trend='';
+    if(l.a1!==null&&l.a2!==null&&Math.abs(l.a1-l.a2)>2){
+      const better=l.a1<l.a2;
+      trend='<span style="font-size:11px;color:'+(better?'#27500a':'#a32d2d')+'">'+( better?'↓':'↑')+fmtH(Math.abs(l.a1-l.a2))+'</span>';
+    }
+    const slaBar='<div style="width:100%;height:4px;border-radius:99px;overflow:hidden;display:flex;margin-top:4px;margin-bottom:4px">'+
+      '<div style="width:'+l.prazo+'%;background:#4CAF50"></div>'+
+      '<div style="width:'+l.risco+'%;background:#F5A623"></div>'+
+      '<div style="width:'+l.atrasou+'%;background:#E24B4A"></div>'+
+      '</div>';
+    return '<div class="loja-card">'+
+      '<div style="margin-bottom:6px">'+
+        '<div class="loja-card-name">'+l.loja+'</div>'+
+        '<span class="b '+pc+'" style="font-size:12px;padding:3px 10px;margin-top:4px;display:inline-block">'+lb+'</span>'+
+      '</div>'+
+      '<div style="margin-bottom:8px;padding-bottom:8px;border-bottom:1px solid #f0efe8">'+
+        '<div style="font-size:11px;color:#888780;margin-bottom:2px">Tempo médio fat.</div>'+
+        '<div style="display:flex;align-items:baseline;gap:5px">'+
+          '<span style="font-size:22px;font-weight:700;color:'+hC+';line-height:1">'+(l.displayH?fmtH(l.displayH):'—')+'</span>'+
+          trend+
+        '</div>'+
+      '</div>'+
+      '<div class="loja-card-row" style="margin-bottom:2px">'+
+        '<span class="loja-card-label">SLA prazo</span>'+
+        '<span class="loja-card-val" style="color:'+(l.prazo>=70?'#27500a':l.prazo>=50?'#854f0b':'#a32d2d')+';font-weight:600">'+l.prazo+'%</span>'+
+      '</div>'+
+      slaBar+
+      '<div class="loja-card-row">'+
+        '<span class="loja-card-label">Pendência</span>'+
+        '<span class="loja-card-val" style="color:'+pC+';font-weight:600">'+(l.pctP>0?l.pctP+'%':'—')+'</span>'+
+      '</div>'+
+    '</div>';
+  }).join('');
+}
+
 let sCol='media_h',sDir=1;
 function sL(col){
   if(sCol===col)sDir*=-1;else{sCol=col;sDir=1;}
@@ -679,10 +775,9 @@ function drawPendChart(chartData,allLojas){
 }
 
 function sw(n){
-  const ns=['lojas','pedidos','pend'];
+  const ns=['lojas','pedidos'];
   document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ns[i]===n));
   ns.forEach(x=>document.getElementById('tp-'+x).classList.toggle('on',x===n));
-  if(n==='pend'&&DATA.length)rPend();
 }
 
 function clearData(){

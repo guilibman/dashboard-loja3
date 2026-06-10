@@ -72,8 +72,8 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .loja-card-label{color:#888780}
 .loja-card-val{font-weight:500;color:#1a1a18}
 .ts{font-size:11px;color:#aaa;margin-top:16px;text-align:right}
-.wa-btn{position:absolute;top:12px;right:12px;border:none;background:none;cursor:pointer;padding:2px;color:#25D366;opacity:0.7;transition:opacity .15s}
-.wa-btn:hover{opacity:1}
+.wa-btn{border:none;background:none;cursor:pointer;padding:0;color:#aaa;opacity:0.6;transition:all .15s;display:flex;align-items:center;justify-content:center;margin-top:8px;padding-top:8px;border-top:1px solid #f0efe8;width:100%}
+.wa-btn:hover{opacity:1;color:#25D366}
 .loja-card{position:relative}
 @media(max-width:600px){.pend-layout{flex-direction:column}.mg{grid-template-columns:repeat(2,1fr)}}
 </style>
@@ -215,6 +215,47 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       <thead><tr><th>Pedido</th><th>Loja faturante</th><th>Status</th><th>Ref. original</th><th>Aging</th></tr></thead>
       <tbody id="rtb"></tbody>
     </table></div>
+  </div>
+
+  <!-- SLA POR LOJA -->
+  <div class="card" style="margin-top:12px">
+    <div class="sl">SLA de entrega por loja</div>
+    <p style="font-size:12px;color:#888780;margin-bottom:14px">% de pedidos faturados por faixa de tempo — ordenado do melhor para o pior SLA</p>
+    <div style="position:relative;height:260px"><canvas id="slaChart"></canvas></div>
+    <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;justify-content:center;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#4CAF50;border-radius:2px;display:inline-block"></span>No prazo ≤24h</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#F5A623;border-radius:2px;display:inline-block"></span>Risco 24–48h</span>
+      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#E24B4A;border-radius:2px;display:inline-block"></span>Atrasou &gt;48h</span>
+    </div>
+  </div>
+
+  <!-- VISÕES 1 e 2 -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+
+    <div class="card">
+      <div class="sl">Visão 1 — Realocados entre os atrasados</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:12px">Dos pedidos faturados com &gt;24h, quantos eram realocados — já partiram de pendência com o mesmo prazo do cliente</p>
+      <div style="position:relative;height:160px"><canvas id="v1Chart"></canvas></div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0efe8;font-size:11px;display:flex;flex-direction:column;gap:4px">
+        <div style="display:flex;justify-content:space-between"><span style="color:#888780">Total faturados &gt;24h</span><span style="font-weight:600">984</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#888780">→ VTX originais</span><span style="font-weight:500">964 (98%)</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#854f0b">→ Realocados (000...)</span><span style="font-weight:600;color:#854f0b">20 (2%)</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="sl">Visão 2 — Desfecho dos realocados</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:12px">De todos os pedidos realocados (000...) no período, qual foi o destino final</p>
+      <div style="position:relative;height:160px"><canvas id="v2Chart"></canvas></div>
+      <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0efe8;font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:4px">
+        <div style="display:flex;justify-content:space-between"><span style="color:#27500a">No prazo ≤24h</span><span style="font-weight:600;color:#27500a">150 (74,6%)</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#854f0b">Risco 24–48h</span><span style="font-weight:600;color:#854f0b">10 (5%)</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#a32d2d">Atrasou &gt;48h</span><span style="font-weight:600;color:#a32d2d">10 (5%)</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#888780">Cancelado</span><span style="font-weight:600">26 (12,9%)</span></div>
+        <div style="display:flex;justify-content:space-between"><span style="color:#888780">A faturar</span><span style="font-weight:600">5 (2,5%)</span></div>
+      </div>
+    </div>
+
   </div>
 </div>
 
@@ -563,7 +604,7 @@ function buildLojaCards(){
         '<span class="loja-card-val" style="color:'+pC+';font-weight:600">'+(l.pctP>0?l.pctP+'%':'—')+'</span>'+
       '</div>'+
       '<button class="wa-btn" onclick="copyWADirect(\''+l.loja+'\')" title="Copiar mensagem WhatsApp">'+
-        '<svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.852L.057 23.55a.75.75 0 00.916.919l5.733-1.498A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.71 9.71 0 01-4.953-1.355l-.355-.212-3.683.963.986-3.592-.232-.369A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>'+
+        '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z"/><path d="M12 0C5.373 0 0 5.373 0 12c0 2.123.554 4.118 1.528 5.852L.057 23.55a.75.75 0 00.916.919l5.733-1.498A11.943 11.943 0 0012 24c6.627 0 12-5.373 12-12S18.627 0 12 0zm0 21.75a9.71 9.71 0 01-4.953-1.355l-.355-.212-3.683.963.986-3.592-.232-.369A9.718 9.718 0 012.25 12C2.25 6.615 6.615 2.25 12 2.25S21.75 6.615 21.75 12 17.385 21.75 12 21.75z"/></svg>'+
       '</button>'+
     '</div>';
   }).join('');
@@ -739,7 +780,7 @@ function rPend(){
     return`<div class="rrow">
       <span style="font-size:12px">${x.l}</span>
       <span style="display:flex;align-items:center;gap:6px">
-        <span style="width:80px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.pct/maxP*100,100)}%;background:${color};border-radius:99px"></span></span>
+        <span style="width:100px;height:5px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.pct,100)}%;background:${color};border-radius:99px"></span></span>
         <span style="font-weight:500;color:${color};min-width:36px;text-align:right;font-size:12px">${x.pct}%</span>
         <span style="font-size:11px;color:#aaa">(${x.cr}/${x.trat})</span>
         <span style="font-size:10px;color:#aaa">${x.can}can+${x.parc}parc</span>
@@ -756,6 +797,87 @@ function rPend(){
       <td style="font-size:11px;color:#888780">${r.mkt||'—'}</td>
       <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
     </tr>`).join('');
+  }
+
+  // Build SLA + V1 + V2 charts
+  buildAnalyticsCharts();
+}
+
+function buildAnalyticsCharts(){
+  // SLA por loja
+  const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
+  const slaData=lojas.map(l=>{
+    const fg=DATA.filter(d=>d.loja===l&&d.fat&&d.hf!==null);
+    if(!fg.length)return null;
+    return{
+      loja:l,
+      prazo:Math.round(fg.filter(d=>d.hf<=24).length/fg.length*100),
+      risco:Math.round(fg.filter(d=>d.hf>24&&d.hf<=48).length/fg.length*100),
+      atrasou:Math.round(fg.filter(d=>d.hf>48).length/fg.length*100),
+      n:fg.length
+    };
+  }).filter(Boolean).sort((a,b)=>b.prazo-a.prazo);
+
+  const slaCanvas=document.getElementById('slaChart');
+  if(slaCanvas){
+    const ex=Chart.getChart(slaCanvas);if(ex)ex.destroy();
+    new Chart(slaCanvas,{type:'bar',
+      data:{labels:slaData.map(l=>l.loja),datasets:[
+        {label:'No prazo ≤24h',data:slaData.map(l=>l.prazo),backgroundColor:'#4CAF50'},
+        {label:'Risco 24–48h',data:slaData.map(l=>l.risco),backgroundColor:'#F5A623'},
+        {label:'Atrasou >48h',data:slaData.map(l=>l.atrasou),backgroundColor:'#E24B4A'},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>` ${i.dataset.label}: ${i.raw}%`}}},
+        scales:{
+          x:{stacked:true,grid:{display:false},ticks:{font:{size:10},color:'#888780'}},
+          y:{stacked:true,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'%'}}
+        }
+      }
+    });
+  }
+
+  // V1 — dos faturados >24h, VTX vs Realocados
+  const fat24=DATA.filter(d=>d.fat&&d.hf!==null&&d.hf>24);
+  const fat24real=fat24.filter(d=>d.tipo==='REALOCADO');
+  const fat24vtx=fat24.filter(d=>d.tipo==='VTX');
+  const v1Canvas=document.getElementById('v1Chart');
+  if(v1Canvas){
+    const ex=Chart.getChart(v1Canvas);if(ex)ex.destroy();
+    // Update summary
+    const v1sum=v1Canvas.parentElement.nextElementSibling;
+    if(v1sum){
+      const rows=v1sum.querySelectorAll('div');
+      if(rows[0])rows[0].querySelector('span:last-child').textContent=fat24.length;
+      if(rows[1])rows[1].querySelector('span:last-child').textContent=fat24vtx.length+' ('+Math.round(fat24vtx.length/Math.max(fat24.length,1)*100)+'%)';
+      if(rows[2])rows[2].querySelector('span:last-child').textContent=fat24real.length+' ('+Math.round(fat24real.length/Math.max(fat24.length,1)*100)+'%)';
+    }
+    new Chart(v1Canvas,{type:'doughnut',
+      data:{labels:['VTX originais','Realocados (000...)'],
+        datasets:[{data:[fat24vtx.length,fat24real.length],backgroundColor:['#d3d1c7','#854F0B'],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'65%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/Math.max(fat24.length,1)*100)}%)`}}}}
+    });
+  }
+
+  // V2 — desfecho dos realocados
+  const allReal=DATA.filter(d=>d.tipo==='REALOCADO');
+  const realFat=allReal.filter(d=>d.fat&&d.hf!==null);
+  const realPrazo=realFat.filter(d=>d.hf<=24).length;
+  const realRisco=realFat.filter(d=>d.hf>24&&d.hf<=48).length;
+  const realAtrasou=realFat.filter(d=>d.hf>48).length;
+  const realCan=allReal.filter(d=>d.can).length;
+  const realAF=allReal.filter(d=>!d.fat&&!d.can).length;
+  const v2Canvas=document.getElementById('v2Chart');
+  if(v2Canvas){
+    const ex=Chart.getChart(v2Canvas);if(ex)ex.destroy();
+    new Chart(v2Canvas,{type:'doughnut',
+      data:{labels:['No prazo ≤24h','Risco 24–48h','Atrasou >48h','Cancelado','A faturar'],
+        datasets:[{data:[realPrazo,realRisco,realAtrasou,realCan,realAF],
+          backgroundColor:['#4CAF50','#F5A623','#E24B4A','#d3d1c7','#b5b3ac'],borderWidth:0}]},
+      options:{responsive:true,maintainAspectRatio:false,cutout:'60%',
+        plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/Math.max(allReal.length,1)*100)}%)`}}}}
+    });
   }
 
   // Chart

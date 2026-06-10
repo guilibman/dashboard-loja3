@@ -547,7 +547,6 @@ function renderAll(filename){
   const fff=document.getElementById('fFrete');if(fff){fff.innerHTML='<option value="">Todos</option>';fretes.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fff.appendChild(o);});}
   const fretesAF=[...new Set(DATA.filter(d=>!d.fat&&!d.can&&d.frete).map(d=>d.frete))].sort();
   const fffr=document.getElementById('fFR');if(fffr){fffr.innerHTML='<option value="">Todos</option>';fretesAF.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fffr.appendChild(o);});}
-  const fretesAF=[...new Set(DATA.filter(d=>!d.fat&&!d.can&&d.frete).map(d=>d.frete))].sort();
   const fffAF=document.getElementById('fFR');if(fffAF){fffAF.innerHTML='<option value="">Todos</option>';fretesAF.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fffAF.appendChild(o);});}
 
   buildLojaCards();rL();rF();rPend();

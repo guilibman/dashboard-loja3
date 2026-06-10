@@ -147,6 +147,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <div class="fr">
       <label>Loja</label><select id="fL" onchange="rF()"><option value="">Todas</option></select>
       <label>Status</label><select id="fS" onchange="rF()"><option value="">Todos</option></select>
+      <label>Frete</label><select id="fFR" onchange="rF()"><option value="">Todos</option></select>
     </div>
     <div class="aging-toggle" id="agingToggle">
       <button class="atg on" onclick="setAging('')">Todos</button>
@@ -188,6 +189,25 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 
 
 
+<!-- SLA DE ENTREGA POR LOJA -->
+<div class="card" style="margin-top:1.5rem">
+  <div class="sl">SLA de entrega por loja</div>
+  <p style="font-size:12px;color:#888780;margin-bottom:14px">% de pedidos faturados por faixa de tempo — do melhor para o pior SLA</p>
+  <div style="position:relative;height:260px"><canvas id="slaChart"></canvas></div>
+  <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;justify-content:center;flex-wrap:wrap">
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#4CAF50;border-radius:2px;display:inline-block"></span>No prazo ≤24h</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#F5A623;border-radius:2px;display:inline-block"></span>Risco 24–48h</span>
+    <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#E24B4A;border-radius:2px;display:inline-block"></span>Atrasou &gt;48h</span>
+  </div>
+</div>
+
+<!-- PARTICIPAÇÃO NOS ATRASADOS -->
+<div class="card" style="margin-top:12px">
+  <div class="sl">Participação por loja — Risco + Atrasou</div>
+  <p style="font-size:12px;color:#888780;margin-bottom:14px">De todos os pedidos faturados com &gt;24h, qual a contribuição de cada loja</p>
+  <div style="position:relative;height:240px"><canvas id="partChart"></canvas></div>
+</div>
+
 <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e4e0">
   <p style="font-size:15px;font-weight:600;color:#1a1a18;margin-bottom:4px">Análise de Pendências</p>
   <p style="font-size:12px;color:#888780;margin-bottom:14px">Cancelamento Total ou Qtde Entregue &lt; Qtde Pedido — contabilizado na loja que sinalizou a pendência.</p>
@@ -209,26 +229,6 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       </div>
     </div>
   </div>
-  <div class="card" id="realCard" style="display:none">
-    <div class="sl">Realocados ainda a faturar</div>
-    <div class="tw"><table>
-      <thead><tr><th>Pedido</th><th>Loja faturante</th><th>Status</th><th>Ref. original</th><th>Aging</th></tr></thead>
-      <tbody id="rtb"></tbody>
-    </table></div>
-  </div>
-
-  <!-- SLA POR LOJA -->
-  <div class="card" style="margin-top:12px">
-    <div class="sl">SLA de entrega por loja</div>
-    <p style="font-size:12px;color:#888780;margin-bottom:14px">% de pedidos faturados por faixa de tempo — ordenado do melhor para o pior SLA</p>
-    <div style="position:relative;height:260px"><canvas id="slaChart"></canvas></div>
-    <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;justify-content:center;flex-wrap:wrap">
-      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#4CAF50;border-radius:2px;display:inline-block"></span>No prazo ≤24h</span>
-      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#F5A623;border-radius:2px;display:inline-block"></span>Risco 24–48h</span>
-      <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#E24B4A;border-radius:2px;display:inline-block"></span>Atrasou &gt;48h</span>
-    </div>
-  </div>
-
   <!-- VISÕES 1 e 2 -->
   <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
 
@@ -257,6 +257,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     </div>
 
   </div>
+
+  <!-- PARTICIPAÇÃO POR LOJA NOS ATRASADOS -->
+  <div class="card" style="margin-top:12px">
+    <div class="sl">Participação por loja — Risco + Atrasou</div>
+    <p style="font-size:12px;color:#888780;margin-bottom:14px">De todos os pedidos faturados com &gt;24h, qual a contribuição de cada loja — em nº absoluto e %</p>
+    <div style="position:relative;height:220px"><canvas id="partChart"></canvas></div>
+  </div>
+
 </div>
 
 <p class="ts" id="ts"></p>
@@ -281,7 +289,10 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/chartjs-plugin-datalabels/2.2.0/chartjs-plugin-datalabels.min.js"></script>
 <script>
+Chart.register(ChartDataLabels);
 const STORAGE_KEY='loja3_dash_v6';
 let DATA=[], LOAD_TIME=new Date(), pendChart=null, activeLojaSet=new Set();
 
@@ -389,6 +400,7 @@ function processData(rows,filename){
     obs:findCol(keys,['Obs'])||'Obs',
     mkt:findCol(keys,['Pedido Marketplace'])||'Pedido Marketplace',
     digit:findCol(keys,['data digitação','data digitacao']),
+    aprova:findCol(keys,['data aprova']),
     emis:findCol(keys,['data de emissão','data de emissao']),
     nota:findCol(keys,['data hora nota','hora nota']),
     nfdata:findCol(keys,['nf data','nf_data']),
@@ -407,7 +419,7 @@ function processData(rows,filename){
     const fat=isFat(status);
     const can=isCan(r[C.cancel]||'');
     const mkt=String(r[C.mkt]||'').trim();
-    const dtE=toDateTime(C.digit?r[C.digit]:null)||toDateTime(C.emis?r[C.emis]:null);
+    const dtE=toDateTime(C.aprova?r[C.aprova]:null)||toDateTime(C.digit?r[C.digit]:null)||toDateTime(C.emis?r[C.emis]:null);
     const dtN=toDateTime(C.nota?r[C.nota]:null)||toDateTime(C.nfdata?r[C.nfdata]:null);
     const dtD=toDateTime(C.entrega?r[C.entrega]:null);
     let hf=null;
@@ -424,7 +436,22 @@ function processData(rows,filename){
       slr:C.slr?String(r[C.slr]||''):'',
       cliente:C.cliente?fmtCliente(r[C.cliente]):'—',
       frete:C.frete?String(r[C.frete]||'').trim():'',
+      vtxNum:(()=>{const m=String(r[C.pedido]||'').match(/VTX-(\d+)-/);return m?m[1]:null;})(),
+      mktCore:(()=>{const mkt=String(r[C.mkt]||'').trim();const m=mkt.match(/(\d{10,})/);return m?m[1].slice(-7):null;})(),
     };
+  });
+
+  // Resolve Data Aprova for realocados via VTX original mktCore
+  const vtxAprovaMap={};
+  DATA.filter(d=>d.tipo==='VTX'&&d.dtE&&d.vtxNum).forEach(d=>{vtxAprovaMap[d.vtxNum]=d.dtE;});
+  DATA.forEach(d=>{
+    if(d.tipo==='REALOCADO'&&!d.dtE&&d.mktCore&&vtxAprovaMap[d.mktCore]){
+      d.dtE=vtxAprovaMap[d.mktCore];
+    }
+  });
+  // Recompute aging after resolving dates
+  DATA.forEach(d=>{
+    if(!d.fat&&!d.can&&d.dtE) d.aging=(LOAD_TIME-d.dtE)/3600000;
   });
 
   try{localStorage.setItem(STORAGE_KEY,JSON.stringify({filename:filename||'arquivo',savedAt:new Date().toISOString(),rows:rows.slice(0,6000)}));}catch(e){}
@@ -518,6 +545,10 @@ function renderAll(filename){
   const flf=document.getElementById('fLF');if(flf){flf.innerHTML='<option value="">Todas</option>';lojas.forEach(l=>{const o=document.createElement('option');o.value=l;o.textContent=l;flf.appendChild(o);});}
   const fretes=[...new Set(DATA.filter(d=>d.fat&&d.frete).map(d=>d.frete))].sort();
   const fff=document.getElementById('fFrete');if(fff){fff.innerHTML='<option value="">Todos</option>';fretes.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fff.appendChild(o);});}
+  const fretesAF=[...new Set(DATA.filter(d=>!d.fat&&!d.can&&d.frete).map(d=>d.frete))].sort();
+  const fffr=document.getElementById('fFR');if(fffr){fffr.innerHTML='<option value="">Todos</option>';fretesAF.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fffr.appendChild(o);});}
+  const fretesAF=[...new Set(DATA.filter(d=>!d.fat&&!d.can&&d.frete).map(d=>d.frete))].sort();
+  const fffAF=document.getElementById('fFR');if(fffAF){fffAF.innerHTML='<option value="">Todos</option>';fretesAF.forEach(f=>{const o=document.createElement('option');o.value=f;o.textContent=f;fffAF.appendChild(o);});}
 
   buildLojaCards();rL();rF();rPend();
   document.getElementById('ts').textContent='Processado em: '+new Date().toLocaleString('pt-BR');
@@ -694,9 +725,11 @@ function setAging(v){
 }
 function rF(){
   const lv=document.getElementById('fL').value,sv=document.getElementById('fS').value;
+  const frv=document.getElementById('fFR')?document.getElementById('fFR').value:'';
   let rows=DATA.filter(d=>!d.fat&&!d.can);
   if(lv)rows=rows.filter(d=>d.loja===lv);
   if(sv)rows=rows.filter(d=>d.status===sv);
+  if(frv)rows=rows.filter(d=>d.frete===frv);
   if(agingFilter==='c')rows=rows.filter(d=>d.aging>48);
   else if(agingFilter==='a')rows=rows.filter(d=>d.aging>=24&&d.aging<=48);
   else if(agingFilter==='o')rows=rows.filter(d=>d.aging!==null&&d.aging<24);
@@ -790,14 +823,7 @@ function rPend(){
 
   // Realocados pendentes
   const rp=DATA.filter(d=>d.tipo==='REALOCADO'&&!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
-  if(rp.length){
-    document.getElementById('realCard').style.display='block';
-    document.getElementById('rtb').innerHTML=rp.map(r=>`<tr class="${(r.aging||0)>48?'alr':''}">
-      <td style="font-weight:500;font-size:11px">${r.pedido}</td><td>${r.loja}</td><td>${sb(r.status)}</td>
-      <td style="font-size:11px;color:#888780">${r.mkt||'—'}</td>
-      <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
-    </tr>`).join('');
-  }
+
 
   // Build SLA + V1 + V2 charts
   buildAnalyticsCharts();
@@ -818,21 +844,59 @@ function buildAnalyticsCharts(){
     };
   }).filter(Boolean).sort((a,b)=>b.prazo-a.prazo);
 
+  const LOJA_ABBREV={'BARRA SHOPPING':'BARRA SH.','CERQUEIRA CESAR':'CERQ. CES.','HIGIENOPOLIS':'HIGIENOP.','ICARAIRJ':'ICARAÍ','BOTAFOGO':'BOTAFOGO','PINHEIROS':'PINHEIROS','BENFICA':'BENFICA','LEBLON':'LEBLON','IPANEMA':'IPANEMA','TIJUCA':'TIJUCA','RIO SUL':'RIO SUL'};
   const slaCanvas=document.getElementById('slaChart');
   if(slaCanvas){
     const ex=Chart.getChart(slaCanvas);if(ex)ex.destroy();
     new Chart(slaCanvas,{type:'bar',
-      data:{labels:slaData.map(l=>l.loja),datasets:[
-        {label:'No prazo ≤24h',data:slaData.map(l=>l.prazo),backgroundColor:'#4CAF50'},
-        {label:'Risco 24–48h',data:slaData.map(l=>l.risco),backgroundColor:'#F5A623'},
-        {label:'Atrasou >48h',data:slaData.map(l=>l.atrasou),backgroundColor:'#E24B4A'},
+      data:{labels:slaData.map(l=>LOJA_ABBREV[l.loja]||l.loja),datasets:[
+        {label:'No prazo ≤24h',data:slaData.map(l=>l.prazo),backgroundColor:'#4CAF50',rawN:slaData.map(l=>Math.round(l.prazo/100*l.n))},
+        {label:'Risco 24–48h',data:slaData.map(l=>l.risco),backgroundColor:'#F5A623',rawN:slaData.map(l=>Math.round(l.risco/100*l.n))},
+        {label:'Atrasou >48h',data:slaData.map(l=>l.atrasou),backgroundColor:'#E24B4A',rawN:slaData.map(l=>Math.round(l.atrasou/100*l.n))},
       ]},
       options:{responsive:true,maintainAspectRatio:false,
-        plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>` ${i.dataset.label}: ${i.raw}%`}}},
+        plugins:{legend:{display:false},tooltip:{callbacks:{
+          label:i=>` ${i.dataset.label}: ${i.raw}% (${i.dataset.rawN[i.dataIndex]})`
+        }}},
         scales:{
-          x:{stacked:true,grid:{display:false},ticks:{font:{size:10},color:'#888780'}},
+          x:{stacked:true,grid:{display:false},ticks:{font:{size:9},color:'#888780',maxRotation:0,minRotation:0,autoSkip:false}},
           y:{stacked:true,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'%'}}
         }
+      }
+    });
+  }
+
+  // Participação por loja nos risco+atrasou
+  const partCanvas=document.getElementById('partChart');
+  if(partCanvas){
+    const ex=Chart.getChart(partCanvas);if(ex)ex.destroy();
+    const partData=slaData.map(l=>({
+      loja:LOJA_ABBREV[l.loja]||l.loja,
+      abs:Math.round((l.risco+l.atrasou)/100*l.n),
+      color:LOJA_COLORS[l.loja]||'#888'
+    })).filter(l=>l.abs>0).sort((a,b)=>b.abs-a.abs);
+    const totalMais24=partData.reduce((s,l)=>s+l.abs,0);
+    new Chart(partCanvas,{type:'bar',
+      data:{labels:partData.map(l=>l.loja),datasets:[{
+        label:'Pedidos >24h',data:partData.map(l=>l.abs),
+        backgroundColor:partData.map(l=>l.color),borderRadius:4,
+      }]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{
+          legend:{display:false},
+          tooltip:{callbacks:{label:i=>`${i.raw} pedidos (${Math.round(i.raw/totalMais24*100)}%)`}},
+          datalabels:{
+            anchor:'end',align:'end',
+            formatter:(v)=>Math.round(v/totalMais24*100)+'%',
+            font:{size:10,weight:'600'},color:'#1a1a18'
+          }
+        },
+        scales:{
+          x:{grid:{display:false},ticks:{font:{size:9},color:'#888780',maxRotation:0,minRotation:0}},
+          y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780'},
+            title:{display:true,text:'Nº pedidos',font:{size:10},color:'#888780'}}
+        },
+        layout:{padding:{top:20}}
       }
     });
   }

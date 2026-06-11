@@ -30,7 +30,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab:hover{color:#1a1a18}
 .tab.on{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
 .tp{display:none}.tp.on{display:block}
-.tw{overflow-x:auto;border:1px solid #e5e4e0;border-radius:8px}
+.tw{overflow-x:auto;border:1px solid #e5e4e0;border-radius:8px;background:#fff}
 table{width:100%;font-size:12px;border-collapse:collapse}
 th{font-size:11px;font-weight:500;color:#888780;text-align:left;padding:8px 10px;border-bottom:1px solid #e5e4e0;background:#fafaf8;white-space:nowrap;cursor:pointer}
 th:hover{color:#1a1a18}
@@ -43,7 +43,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .alr td:first-child{border-left:3px solid #e24b4a}
 .warn-tr td:first-child{border-left:3px solid #F5A623}
 .card{background:#fff;border:1px solid #e5e4e0;border-radius:8px;padding:16px 18px;margin-bottom:12px}
-.sl{font-size:11px;font-weight:500;letter-spacing:.06em;text-transform:uppercase;color:#888780;margin-bottom:10px}
+.sl{font-size:11px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:#3a3a38;margin-bottom:10px}
 .rrow{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid #f0efe8;font-size:13px}
 .rrow:last-child{border-bottom:none}
 .note{background:#e6f1fb;border-radius:6px;padding:10px 14px;font-size:12px;color:#0c447c;margin-bottom:14px;border:1px solid #b5d4f4;line-height:1.5}
@@ -199,13 +199,6 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#F5A623;border-radius:2px;display:inline-block"></span>Risco 24–48h</span>
     <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#E24B4A;border-radius:2px;display:inline-block"></span>Atrasou &gt;48h</span>
   </div>
-</div>
-
-<!-- PARTICIPAÇÃO NOS ATRASADOS -->
-<div class="card" style="margin-top:12px">
-  <div class="sl">Participação por loja — Risco + Atrasou</div>
-  <p style="font-size:12px;color:#888780;margin-bottom:14px">De todos os pedidos faturados com &gt;24h, qual a contribuição de cada loja</p>
-  <div style="position:relative;height:240px"><canvas id="partChart"></canvas></div>
 </div>
 
 <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e4e0">
@@ -416,7 +409,8 @@ function processData(rows,filename){
   DATA=rows.filter(r=>String(r[C.pedido]||'').trim().length>3).map(r=>{
     const pedido=String(r[C.pedido]||'').trim();
     const status=String(r[C.status]||'').trim();
-    const fat=isFat(status);
+    const _hasNota=!!(C.nota&&r[C.nota]&&String(r[C.nota]).trim()!=='');
+    const fat=isFat(status)||_hasNota;
     const can=isCan(r[C.cancel]||'');
     const mkt=String(r[C.mkt]||'').trim();
     const dtE=toDateTime(C.aprova?r[C.aprova]:null)||toDateTime(C.digit?r[C.digit]:null)||toDateTime(C.emis?r[C.emis]:null);
@@ -810,7 +804,7 @@ function rPend(){
   document.getElementById('pendList').innerHTML=pendByLoja.map(x=>{
     const color=x.pct>=20?'#e24b4a':x.pct>=10?'#ba7517':'#639922';
     return`<div class="rrow">
-      <span style="font-size:12px">${x.l}</span>
+      <span style="font-size:11px">${x.l}</span>
       <span style="display:flex;align-items:center;gap:6px">
         <span style="width:100px;height:5px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.pct,100)}%;background:${color};border-radius:99px"></span></span>
         <span style="font-weight:500;color:${color};min-width:36px;text-align:right;font-size:12px">${x.pct}%</span>

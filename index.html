@@ -107,7 +107,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   <span>CSV ou Excel (.xlsx)</span>
   <span style="display:inline-block;background:#1a1a18;color:#fff;font-size:13px;padding:8px 20px;border-radius:6px;font-weight:500">Selecionar arquivo</span>
 </label>
-<input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" onchange="handleFile(event)">
+<input type="file" id="fileInput" accept=".csv,.xlsx,.xls" style="position:fixed;top:-9999px;left:-9999px;width:1px;height:1px;opacity:0" onchange="window._handleFile(event)">
 
 <div id="dash" style="display:none">
 <div class="mg" id="metricsRow"></div>
@@ -313,6 +313,8 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 <script>
 Chart.register(ChartDataLabels);
 const STORAGE_KEY='loja3_dash_v6';
+// Global wrapper so inline onchange can find handleFile before script fully loads
+window._handleFile=function(e){handleFile(e);};
 let DATA=[], LOAD_TIME=new Date(), pendChart=null, activeLojaSet=new Set();
 
 const VTEX_URLS={
@@ -1098,6 +1100,58 @@ function buildWAMsg(loja){
   msg+='\n\n_Dashboard: https://dashboard-faturamento-pedidos.vercel.app/_';
   return msg;
 }
+function handleFile(e){
+  const file=e.target.files[0];if(!file)return;
+  const ext=file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){Papa.parse(file,{header:true,skipEmptyLines:true,complete:r=>processData(r.data,file.name)});}
+  else{
+    const reader=new FileReader();
+    reader.onload=ev=>{
+      const wb=XLSX.read(ev.target.result,{type:'array',cellDates:false});
+      processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:true}),file.name);
+    };
+    reader.readAsArrayBuffer(file);
+  }
+}
+
+// ============================================================
+// INIT
+// ============================================================
+const zone=document.getElementById('uploadZone');
+if(zone){
+  zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('drag');});
+  zone.addEventListener('dragleave',()=>zone.classList.remove('drag'));
+  zone.addEventListener('drop',e=>{e.preventDefault();zone.classList.remove('drag');if(e.dataTransfer.files[0])handleFile({target:{files:e.dataTransfer.files}});});
+}
+
+window.addEventListener('load',()=>{
+  document.getElementById('uploadZone').style.display='none';
+  document.getElementById('loadingBanner').style.display='block';
+  fetch('pedidos.xlsx',{cache:'no-store'})
+    .then(r=>{if(!r.ok)throw new Error('not found');return r.arrayBuffer();})
+    .then(buf=>{
+      document.getElementById('loadingBanner').style.display='none';
+      const wb=XLSX.read(buf,{type:'array',cellDates:false});
+      processData(XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]],{defval:'',raw:true}),'pedidos.xlsx');
+    })
+    .catch(()=>{
+      document.getElementById('loadingBanner').style.display='none';
+      document.getElementById('uploadZone').style.display='block';
+      try{
+        const saved=localStorage.getItem(STORAGE_KEY);
+        if(saved){
+          const p=JSON.parse(saved);
+          if(p&&p.rows&&p.rows.length){
+            const banner=document.getElementById('savedBanner');
+            banner.style.display='flex';
+            document.getElementById('savedMsg').textContent=`Dados salvos encontrados · ${p.filename} · ${new Date(p.savedAt).toLocaleString('pt-BR')} — clique para carregar`;
+            banner.style.cursor='pointer';
+            banner.onclick=()=>{banner.onclick=null;processData(p.rows,p.filename+' (cache)');};
+          }
+        }
+      }catch(e){}
+    });
+});
 
 </script>
 </body>

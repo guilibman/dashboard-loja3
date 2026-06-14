@@ -195,14 +195,14 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   <p style="font-size:12px;color:#888780;margin-bottom:12px">Horas por semana — filtre pelas iniciais</p>
   <div id="semFilters" style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px"></div>
   <div id="semLegend" style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:10px;font-size:11px;color:#888780"></div>
-  <div style="position:relative;height:240px"><canvas id="semChart" role="img" aria-label="Evolução semanal do tempo médio de faturamento por loja">Gráfico de linhas com evolução semanal do tempo médio de faturamento por loja.</canvas></div>
+  <div style="position:relative;height:240px"><canvas id="semChart" role="img" aria-label="Evolução semanal do tempo médio de faturamento por loja"></canvas></div>
 </div>
 
 <!-- SLA DE ENTREGA POR LOJA -->
 <div class="card" style="margin-top:12px">
   <div class="sl">SLA de entrega por loja</div>
   <p style="font-size:12px;color:#888780;margin-bottom:14px">% de pedidos faturados por faixa de tempo — do melhor para o pior SLA</p>
-  <div style="position:relative;height:260px"><canvas id="slaChart" role="img" aria-label="SLA de entrega por loja em barras empilhadas">Barras empilhadas 100% mostrando SLA por loja.</canvas></div>
+  <div style="position:relative;height:260px"><canvas id="slaChart" role="img" aria-label="SLA de entrega por loja"></canvas></div>
   <div style="display:flex;gap:16px;margin-top:12px;font-size:12px;justify-content:center;flex-wrap:wrap">
     <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#4CAF50;border-radius:2px;display:inline-block"></span>No prazo ≤24h</span>
     <span style="display:flex;align-items:center;gap:5px"><span style="width:12px;height:12px;background:#F5A623;border-radius:2px;display:inline-block"></span>Risco 24–48h</span>
@@ -210,24 +210,32 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   </div>
 </div>
 
-<!-- PARTICIPAÇÃO NOS ATRASADOS -->
-<div class="card" style="margin-top:12px">
-  <div class="sl">Participação por loja — Risco + Atrasou</div>
-  <p style="font-size:12px;color:#888780;margin-bottom:14px">De todos os pedidos faturados com &gt;24h, qual a contribuição de cada loja</p>
-  <div style="position:relative;height:240px"><canvas id="partChart" role="img" aria-label="Participação de cada loja nos pedidos com risco ou atraso">Barras verticais mostrando participação de cada loja nos pedidos com risco ou atraso.</canvas></div>
+<!-- PARTICIPAÇÃO + FRETE LADO A LADO -->
+<div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+  <div class="card">
+    <div class="sl">Participação por loja — Risco + Atrasou</div>
+    <p style="font-size:12px;color:#888780;margin-bottom:14px">De todos os pedidos faturados com &gt;24h, qual a contribuição de cada loja</p>
+    <div style="position:relative;height:240px"><canvas id="partChart" role="img" aria-label="Participação de cada loja nos pedidos com risco ou atraso"></canvas></div>
+  </div>
+  <div class="card">
+    <div class="sl">Tipo de frete vs tempo de faturamento</div>
+    <p style="font-size:12px;color:#888780;margin-bottom:8px">Tempo médio (barras) e % no prazo (linha) por modalidade</p>
+    <div style="display:flex;gap:14px;margin-bottom:10px;font-size:11px;color:#888780;flex-wrap:wrap">
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#4CAF50;display:inline-block"></span>≥80%</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#F5A623;display:inline-block"></span>70–79%</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#E24B4A;display:inline-block"></span>&lt;70%</span>
+      <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:16px;height:2px;background:#185FA5;vertical-align:middle"></span>% no prazo</span>
+    </div>
+    <div style="position:relative;height:200px"><canvas id="freteChart" role="img" aria-label="Tipo de frete vs tempo de faturamento"></canvas></div>
+  </div>
 </div>
 
-<!-- RECEITA PERDIDA -->
-<div class="card" style="margin-top:12px">
-  <div class="sl">Receita perdida por pendências</div>
-  <p style="font-size:12px;color:#888780;margin-bottom:4px">Valor de pedidos com pendência não recuperados por realocado — cancelamentos totais + parciais sem cobertura</p>
-  <p style="font-size:12px;color:#888780;margin-bottom:12px">Total estimado: <strong style="color:#a32d2d" id="receitaPerdidaTotal">—</strong></p>
-  <div id="receitaPerdidaList"></div>
-</div>
-
+<!-- ANÁLISE DE PENDÊNCIAS -->
 <div style="margin-top:2rem;padding-top:1.5rem;border-top:1px solid #e5e4e0">
   <p style="font-size:15px;font-weight:600;color:#1a1a18;margin-bottom:4px">Análise de Pendências</p>
   <p style="font-size:12px;color:#888780;margin-bottom:14px">Cancelamento Total ou Qtde Entregue &lt; Qtde Pedido — contabilizado na loja que sinalizou a pendência.</p>
+
+  <!-- % Pendência por loja + Pendências por dia lado a lado -->
   <div style="display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px">
     <div class="card" style="min-width:220px;flex:1">
       <div class="sl">% pendência por loja</div>
@@ -242,45 +250,40 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
         <div id="lojaFilters" style="display:flex;flex-wrap:wrap;gap:4px;max-width:280px"></div>
       </div>
       <div style="position:relative;width:100%;height:200px">
-        <canvas id="pendChart" role="img" aria-label="Gráfico de pendências diárias por loja"></canvas>
+        <canvas id="pendChart" role="img" aria-label="Pendências por dia por loja"></canvas>
       </div>
     </div>
   </div>
 
-  <!-- CUSTO EXTRA FRETE -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="sl">Custo extra de frete estimado</div>
-    <p style="font-size:12px;color:#888780;margin-bottom:4px">Frete adicional gerado por pendências parciais (realocados)</p>
-    <p style="font-size:12px;color:#888780;margin-bottom:12px">Total estimado: <strong style="color:#a32d2d" id="freteExtraTotal">—</strong></p>
-    <div id="freteExtraList"></div>
-    <p style="font-size:10px;color:#aaa;margin-top:10px;padding-top:8px;border-top:1px solid #f0efe8">* Cancelamentos totais não geram custo extra. Estimativa por modalidade.</p>
-  </div>
-
-  <!-- FRETE VS TEMPO -->
-  <div class="card" style="margin-bottom:12px">
-    <div class="sl">Tipo de frete vs tempo de faturamento</div>
-    <p style="font-size:12px;color:#888780;margin-bottom:8px">Tempo médio (barras) e % no prazo (linha) por modalidade</p>
-    <div style="display:flex;gap:14px;margin-bottom:10px;font-size:11px;color:#888780;flex-wrap:wrap">
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#4CAF50;display:inline-block"></span>≥80% prazo</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#F5A623;display:inline-block"></span>70–79%</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:#E24B4A;display:inline-block"></span>&lt;70%</span>
-      <span style="display:flex;align-items:center;gap:4px"><span style="display:inline-block;width:20px;height:2px;background:#185FA5;vertical-align:middle"></span>% no prazo</span>
+  <!-- Receita perdida + Custo extra lado a lado -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px">
+    <div class="card">
+      <div class="sl">Receita perdida por pendências</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:4px">Cancelamentos totais + parciais sem cobertura de realocado</p>
+      <p style="font-size:12px;color:#888780;margin-bottom:12px">Total: <strong style="color:#a32d2d" id="receitaPerdidaTotal">—</strong></p>
+      <div id="receitaPerdidaList"></div>
     </div>
-    <div style="position:relative;height:240px"><canvas id="freteChart" role="img" aria-label="Gráfico combinado de tempo médio e percentual no prazo por tipo de frete">Barras de tempo médio e linha de % no prazo por tipo de frete.</canvas></div>
+    <div class="card">
+      <div class="sl">Custo extra de frete estimado</div>
+      <p style="font-size:12px;color:#888780;margin-bottom:4px">Frete adicional gerado por pendências parciais</p>
+      <p style="font-size:12px;color:#888780;margin-bottom:12px">Total: <strong style="color:#a32d2d" id="freteExtraTotal">—</strong></p>
+      <div id="freteExtraList"></div>
+      <p style="font-size:10px;color:#aaa;margin-top:10px;padding-top:8px;border-top:1px solid #f0efe8">* Cancelamentos totais não geram custo extra. Estimativa por modalidade.</p>
+    </div>
   </div>
 
-  <!-- VISÕES 1 e 2 -->
-  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-top:12px">
+  <!-- Visão 1 + Visão 2 lado a lado -->
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
     <div class="card">
       <div class="sl">Visão 1 — Realocados entre os atrasados</div>
       <p style="font-size:12px;color:#888780;margin-bottom:12px">Dos faturados com &gt;24h, quantos eram realocados — partiram de pendência com o mesmo prazo do cliente</p>
-      <div style="position:relative;height:160px"><canvas id="v1Chart" role="img" aria-label="Proporção de VTX originais vs realocados entre os pedidos faturados com atraso">Rosca mostrando proporção de VTX vs realocados nos faturados com atraso.</canvas></div>
+      <div style="position:relative;height:160px"><canvas id="v1Chart" role="img" aria-label="Proporção VTX vs realocados nos faturados com atraso"></canvas></div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0efe8;font-size:11px;display:flex;flex-direction:column;gap:4px" id="v1Summary"></div>
     </div>
     <div class="card">
       <div class="sl">Visão 2 — Desfecho dos realocados</div>
       <p style="font-size:12px;color:#888780;margin-bottom:12px">De todos os pedidos realocados (000...) no período, qual foi o destino final</p>
-      <div style="position:relative;height:160px"><canvas id="v2Chart" role="img" aria-label="Rosca mostrando desfecho dos pedidos realocados">Rosca com desfecho dos realocados: prazo, risco, atraso, cancelado, a faturar.</canvas></div>
+      <div style="position:relative;height:160px"><canvas id="v2Chart" role="img" aria-label="Desfecho dos pedidos realocados"></canvas></div>
       <div style="margin-top:12px;padding-top:10px;border-top:1px solid #f0efe8;font-size:11px;display:grid;grid-template-columns:1fr 1fr;gap:4px" id="v2Summary"></div>
     </div>
   </div>
@@ -852,15 +855,57 @@ function rPend(){
   buildAnalyticsCharts();
 }
 
+function buildChartFilters(lojas, chartData){
+  const container=document.getElementById('lojaFilters');
+  if(!container)return;
+  container.innerHTML='';
+  lojas.forEach(l=>{
+    const c=LOJA_COLORS[l]||'#888',active=activeLojaSet.has(l);
+    const btn=document.createElement('button');
+    btn.className='lbtn';btn.title=l;
+    btn.style.cssText=`border:1px solid ${c};background:${active?c:'transparent'};color:${active?'#fff':c}`;
+    btn.textContent=l.split(' ').map(w=>w[0]).join('').slice(0,3);
+    btn.onclick=()=>{
+      if(activeLojaSet.has(l)){activeLojaSet.delete(l);btn.style.background='transparent';btn.style.color=c;}
+      else{activeLojaSet.add(l);btn.style.background=c;btn.style.color='#fff';}
+      drawPendChart(chartData,lojas);
+    };
+    container.appendChild(btn);
+  });
+}
+
+function drawPendChart(chartData,allLojas){
+  const canvas=document.getElementById('pendChart');
+  if(!canvas)return;
+  const existing=Chart.getChart(canvas);if(existing)existing.destroy();
+  if(pendChart)try{pendChart.destroy();}catch(e){}
+  pendChart=new Chart(canvas,{type:'line',
+    data:{labels:chartData.dates,datasets:allLojas.filter(l=>activeLojaSet.has(l)).map(l=>({
+      label:l,data:chartData.series[l],borderColor:LOJA_COLORS[l]||'#888',
+      backgroundColor:(LOJA_COLORS[l]||'#888')+'22',borderWidth:2,pointRadius:2,pointHoverRadius:4,tension:0.3,fill:false,
+      datalabels:{display:false}
+    }))},
+    options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{title:i=>i[0].label,label:i=>` ${i.dataset.label}: ${i.raw}`}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',maxRotation:45,autoSkip:true,maxTicksLimit:18}},
+        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',precision:0,stepSize:1}}
+      }
+    }
+  });
+}
+
+
 function buildAnalyticsCharts(){
   const LOJA_ABBREV={'BARRA SHOPPING':'BARRA SH.','CERQUEIRA CESAR':'CERQ. CES.','HIGIENOPOLIS':'HIGIENOP.','ICARAIRJ':'ICARAÍ','BOTAFOGO':'BOTAFOGO','PINHEIROS':'PINHEIROS','BENFICA':'BENFICA','LEBLON':'LEBLON','IPANEMA':'IPANEMA','TIJUCA':'TIJUCA','RIO SUL':'RIO SUL'};
+  // More contrastive colors for semanal chart
+  const SEM_COLORS={"BARRA SHOPPING":"#D62728","BENFICA":"#8B4513","BOTAFOGO":"#1F77B4","CERQUEIRA CESAR":"#7B2D8B","HIGIENOPOLIS":"#2CA02C","ICARAIRJ":"#17BECF","IPANEMA":"#BCBD22","LEBLON":"#E377C2","PINHEIROS":"#00876A","RIO SUL":"#555555","TIJUCA":"#FF7F0E"};
 
   // ---- EVOLUÇÃO SEMANAL ----
   const fatRows=DATA.filter(d=>d.fat&&d.hf!==null&&d.dtN);
   const semMap={};
   fatRows.forEach(d=>{
     const dt=d.dtN;
-    // Get week start (Monday)
     const day=dt.getDay();
     const diff=dt.getDate()-(day===0?6:day-1);
     const mon=new Date(dt.getFullYear(),dt.getMonth(),diff);
@@ -873,19 +918,16 @@ function buildAnalyticsCharts(){
   const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
   const semSeries={};
   lojas.forEach(l=>{semSeries[l]=semanas.map(s=>{const vals=semMap[s]&&semMap[s][l]?semMap[s][l]:[];return vals.length>=3?Math.round(vals.reduce((a,b)=>a+b,0)/vals.length*10)/10:null;});});
-  // Top 5 by avg
   const semAvgs=lojas.map(l=>({l,avg:semSeries[l].filter(v=>v!==null).reduce((a,b)=>a+b,0)/Math.max(semSeries[l].filter(v=>v!==null).length,1)})).sort((a,b)=>b.avg-a.avg);
   const semActive=new Set(semAvgs.slice(0,5).map(x=>x.l));
-
-  // Build filter buttons
   const semFiltersEl=document.getElementById('semFilters');
   if(semFiltersEl&&!semFiltersEl.children.length){
     lojas.forEach(l=>{
-      const c=LOJA_COLORS[l]||'#888';
+      const c=SEM_COLORS[l]||'#888';
       const active=semActive.has(l);
       const btn=document.createElement('button');
       btn.className='lbtn';btn.title=l;
-      btn.style.cssText=`border:1px solid ${c};background:${active?c:'transparent'};color:${active?'#fff':c}`;
+      btn.style.cssText=`border:1px solid ${c};background:${active?c:'transparent'};color:${active?'#fff':c};font-weight:600`;
       btn.textContent=l.split(' ').map(w=>w[0]).join('').slice(0,3);
       btn.onclick=()=>{
         if(semActive.has(l)){semActive.delete(l);btn.style.background='transparent';btn.style.color=c;}
@@ -897,13 +939,32 @@ function buildAnalyticsCharts(){
   }
   function updateSemLegend(){
     const el=document.getElementById('semLegend');
-    if(el)el.innerHTML=lojas.filter(l=>semActive.has(l)).map(l=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${LOJA_COLORS[l]||'#888'};display:inline-block"></span>${l}</span>`).join('');
+    if(el)el.innerHTML=lojas.filter(l=>semActive.has(l)).map(l=>`<span style="display:flex;align-items:center;gap:4px"><span style="width:10px;height:10px;border-radius:2px;background:${SEM_COLORS[l]||'#888'};display:inline-block"></span>${l}</span>`).join('');
   }
   updateSemLegend();
   function drawSemChart(){
     const canvas=document.getElementById('semChart');if(!canvas)return;
     const ex=Chart.getChart(canvas);if(ex)ex.destroy();
-    new Chart(canvas,{type:'line',data:{labels:semanas,datasets:lojas.filter(l=>semActive.has(l)).map(l=>({label:l,data:semSeries[l],borderColor:LOJA_COLORS[l]||'#888',backgroundColor:(LOJA_COLORS[l]||'#888')+'22',borderWidth:2,pointRadius:3,pointHoverRadius:5,tension:0.3,fill:false,spanGaps:true}))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},plugins:{legend:{display:false},tooltip:{callbacks:{title:i=>'Semana '+i[0].label,label:i=>i.raw!==null?` ${i.dataset.label}: ${i.raw}h`:null}}},scales:{x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#888780'}},y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'h'}}}}});
+    new Chart(canvas,{type:'line',data:{labels:semanas,datasets:lojas.filter(l=>semActive.has(l)).map(l=>({
+      label:l,data:semSeries[l],borderColor:SEM_COLORS[l]||'#888',
+      backgroundColor:(SEM_COLORS[l]||'#888')+'33',borderWidth:2.5,
+      pointRadius:4,pointHoverRadius:6,tension:0.3,fill:false,spanGaps:true,
+      datalabels:{
+        display:true,
+        formatter:v=>v!==null?v+'h':null,
+        color:SEM_COLORS[l]||'#888',
+        font:{size:9,weight:'600'},
+        anchor:'end',align:'top',offset:4,
+        backgroundColor:'rgba(255,255,255,0.8)',
+        borderRadius:3,padding:{top:1,bottom:1,left:2,right:2}
+      }
+    }))},options:{responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},
+      plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{title:i=>'Semana '+i[0].label,label:i=>i.raw!==null?` ${i.dataset.label}: ${i.raw}h`:null}}},
+      scales:{
+        x:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:11},color:'#888780'}},
+        y:{beginAtZero:true,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'h'}}
+      }
+    }});
   }
   drawSemChart();
 
@@ -915,19 +976,77 @@ function buildAnalyticsCharts(){
   }).filter(Boolean).sort((a,b)=>b.prazo-a.prazo);
   const slaCanvas=document.getElementById('slaChart');
   if(slaCanvas){const ex=Chart.getChart(slaCanvas);if(ex)ex.destroy();
-    new Chart(slaCanvas,{type:'bar',data:{labels:slaData.map(l=>LOJA_ABBREV[l.loja]||l.loja),datasets:[{label:'No prazo ≤24h',data:slaData.map(l=>l.prazo),backgroundColor:'#4CAF50',rawN:slaData.map(l=>Math.round(l.prazo/100*l.n))},{label:'Risco 24–48h',data:slaData.map(l=>l.risco),backgroundColor:'#F5A623',rawN:slaData.map(l=>Math.round(l.risco/100*l.n))},{label:'Atrasou >48h',data:slaData.map(l=>l.atrasou),backgroundColor:'#E24B4A',rawN:slaData.map(l=>Math.round(l.atrasou/100*l.n))},]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>` ${i.dataset.label}: ${i.raw}% (${i.dataset.rawN[i.dataIndex]})`}}},scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:9},color:'#888780',maxRotation:0,minRotation:0,autoSkip:false}},y:{stacked:true,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'%'}}}}}
-  );}
+    new Chart(slaCanvas,{type:'bar',
+      data:{labels:slaData.map(l=>LOJA_ABBREV[l.loja]||l.loja),datasets:[
+        {label:'No prazo ≤24h',data:slaData.map(l=>l.prazo),backgroundColor:'#4CAF50',rawN:slaData.map(l=>Math.round(l.prazo/100*l.n)),datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v,ctx)=>{const n=ctx.dataset.rawN[ctx.dataIndex];return v>5?v+'%\n('+n+')':null;}}},
+        {label:'Risco 24–48h',data:slaData.map(l=>l.risco),backgroundColor:'#F5A623',rawN:slaData.map(l=>Math.round(l.risco/100*l.n)),datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v,ctx)=>{const n=ctx.dataset.rawN[ctx.dataIndex];return v>5?v+'%\n('+n+')':null;}}},
+        {label:'Atrasou >48h',data:slaData.map(l=>l.atrasou),backgroundColor:'#E24B4A',rawN:slaData.map(l=>Math.round(l.atrasou/100*l.n)),datalabels:{color:'#fff',font:{size:10,weight:'700'},formatter:(v,ctx)=>{const n=ctx.dataset.rawN[ctx.dataIndex];return v>5?v+'%\n('+n+')':null;}}},
+      ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},datalabels:{anchor:'center',align:'center'},tooltip:{callbacks:{label:i=>` ${i.dataset.label}: ${i.raw}% (${i.dataset.rawN[i.dataIndex]})`}}},
+        scales:{x:{stacked:true,grid:{display:false},ticks:{font:{size:9},color:'#888780',maxRotation:0,minRotation:0,autoSkip:false}},y:{stacked:true,max:100,grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'%'}}}
+      }
+    });
+  }
 
   // ---- PARTICIPAÇÃO RISCO+ATRASOU ----
   const partCanvas=document.getElementById('partChart');
   if(partCanvas){const ex=Chart.getChart(partCanvas);if(ex)ex.destroy();
     const partData=slaData.map(l=>({loja:LOJA_ABBREV[l.loja]||l.loja,abs:Math.round((l.risco+l.atrasou)/100*l.n),color:LOJA_COLORS[l.loja]||'#888'})).filter(l=>l.abs>0).sort((a,b)=>b.abs-a.abs);
     const tot24=partData.reduce((s,l)=>s+l.abs,0);
-    new Chart(partCanvas,{type:'bar',data:{labels:partData.map(l=>l.loja),datasets:[{label:'Pedidos >24h',data:partData.map(l=>l.abs),backgroundColor:partData.map(l=>l.color),borderRadius:4}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{anchor:'end',align:'end',formatter:v=>Math.round(v/tot24*100)+'%',font:{size:10,weight:'600'},color:'#1a1a18'},tooltip:{callbacks:{label:i=>`${i.raw} pedidos (${Math.round(i.raw/tot24*100)}%)`}}},scales:{x:{grid:{display:false},ticks:{font:{size:9},color:'#888780',maxRotation:0,minRotation:0}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780'},title:{display:true,text:'Nº pedidos',font:{size:10},color:'#888780'}}},layout:{padding:{top:20}}}});
+    new Chart(partCanvas,{type:'bar',data:{labels:partData.map(l=>l.loja),datasets:[{label:'Pedidos >24h',data:partData.map(l=>l.abs),backgroundColor:partData.map(l=>l.color),borderRadius:4,
+      datalabels:{anchor:'end',align:'end',formatter:v=>Math.round(v/tot24*100)+'%',font:{size:10,weight:'600'},color:'#1a1a18'}}]},
+      options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{label:i=>`${i.raw} pedidos (${Math.round(i.raw/tot24*100)}%)`}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:9},color:'#888780',maxRotation:0,minRotation:0}},y:{grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780'},title:{display:true,text:'Nº pedidos',font:{size:10},color:'#888780'}}},layout:{padding:{top:20}}}});
   }
 
+  // ---- FRETE VS TEMPO ----
+  const freteStats={};
+  DATA.filter(d=>d.fat&&d.hf!==null&&d.frete).forEach(d=>{
+    const f=String(d.frete).trim();
+    let grp=f;
+    if(f.toUpperCase().includes('RETIRADA HOJE'))grp='Retirada Hoje!';
+    else if(f.toUpperCase().includes('RETIRADA'))grp='Retirada Loja';
+    else if(f.toUpperCase().includes('LOGGI'))grp='LOGGI';
+    if(!freteStats[grp])freteStats[grp]={hfs:[],n:0};
+    freteStats[grp].hfs.push(d.hf);freteStats[grp].n++;
+  });
+  const freteArr2=Object.entries(freteStats).filter(([,v])=>v.n>=5).map(([f,v])=>({f,n:v.n,media:Math.round(v.hfs.reduce((a,b)=>a+b,0)/v.n*10)/10,prazo:Math.round(v.hfs.filter(h=>h<=24).length/v.n*100)})).sort((a,b)=>a.media-b.media);
+  const freteCanvas=document.getElementById('freteChart');
+  if(freteCanvas){const ex=Chart.getChart(freteCanvas);if(ex)ex.destroy();
+    new Chart(freteCanvas,{type:'bar',
+      data:{labels:freteArr2.map(f=>f.f),
+        datasets:[
+          {label:'Tempo médio (h)',data:freteArr2.map(f=>f.media),backgroundColor:freteArr2.map(f=>f.prazo>=80?'#4CAF50':f.prazo>=70?'#F5A623':'#E24B4A'),borderRadius:4,yAxisID:'y',
+            datalabels:{anchor:'center',align:'center',color:'#fff',font:{size:10,weight:'700'},formatter:v=>v+'h'}},
+          {label:'% no prazo',data:freteArr2.map(f=>f.prazo),type:'line',borderColor:'#185FA5',backgroundColor:'transparent',borderWidth:2,pointRadius:4,pointBackgroundColor:'#fff',pointBorderColor:'#185FA5',pointBorderWidth:2,yAxisID:'y2',
+            datalabels:{anchor:'end',align:'top',color:'#185FA5',font:{size:9,weight:'600'},formatter:v=>v+'%',backgroundColor:'rgba(255,255,255,0.85)',borderRadius:3,padding:{top:1,bottom:1,left:2,right:2}}}
+        ]},
+      options:{responsive:true,maintainAspectRatio:false,
+        plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{label:i=>i.datasetIndex===0?` Tempo médio: ${i.raw}h (n=${freteArr2[i.dataIndex].n})`:`% no prazo: ${i.raw}%`}}},
+        scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#888780',maxRotation:30}},y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'h'},title:{display:true,text:'Horas',font:{size:10},color:'#888780'}},y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{font:{size:10},color:'#185FA5',callback:v=>v+'%'},title:{display:true,text:'% Prazo',font:{size:10},color:'#185FA5'}}},layout:{padding:{top:16}}}
+    });
+  }
+
+  // ---- PENDÊNCIAS POR DIA (chart) ----
+  const pendRows=DATA.filter(d=>d.pend&&d.dtE);
+  const dateMap={};
+  pendRows.forEach(d=>{
+    const key=String(d.dtE.getDate()).padStart(2,'0')+'/'+String(d.dtE.getMonth()+1).padStart(2,'0');
+    if(!dateMap[key])dateMap[key]={};
+    dateMap[key][d.loja]=(dateMap[key][d.loja]||0)+1;
+  });
+  const allDates=[...new Set(pendRows.map(d=>String(d.dtE.getDate()).padStart(2,'0')+'/'+String(d.dtE.getMonth()+1).padStart(2,'0')))].sort((a,b)=>{const[da,ma]=a.split('/').map(Number);const[db,mb]=b.split('/').map(Number);return ma!==mb?ma-mb:da-db;});
+  const allLojasChart=[...new Set(pendRows.map(d=>d.loja))].sort();
+  const chartSeries={};
+  allLojasChart.forEach(l=>{chartSeries[l]=allDates.map(dt=>dateMap[dt]?dateMap[dt][l]||0:0);});
+  const totals=allLojasChart.map(l=>chartSeries[l].reduce((a,b)=>a+b,0));
+  const top5=allLojasChart.slice().sort((a,b)=>totals[allLojasChart.indexOf(b)]-totals[allLojasChart.indexOf(a)]).slice(0,5);
+  activeLojaSet=new Set(top5);
+  buildChartFilters(allLojasChart,{dates:allDates,series:chartSeries});
+  drawPendChart({dates:allDates,series:chartSeries},allLojasChart);
+
   // ---- RECEITA PERDIDA ----
-  // VTX cancelados sem realocado faturado + parciais sem realocado
   function normMkt(mkt){if(!mkt)return null;const m=String(mkt).match(/(\d{10,})/);return m?m[1]:null;}
   const realFatMkts=new Set(DATA.filter(d=>d.tipo==='REALOCADO'&&d.fat).map(d=>normMkt(d.mkt)).filter(Boolean));
   const recPerdidaByLoja={};
@@ -935,20 +1054,17 @@ function buildAnalyticsCharts(){
     const mktKey=normMkt(d.mkt);
     const temRealoc=mktKey&&realFatMkts.has(mktKey);
     let perdido=0;
-    if(d.can&&!temRealoc){
-      perdido=d.valorPedido||0;
-    } else if(d.pendParcial&&!temRealoc){
-      perdido=Math.max((d.valorPedido||0)-(d.valorEntregue||0),0);
-    }
-    if(perdido>0){recPerdidaByLoja[d.loja]=(recPerdidaByLoja[d.loja]||0)+perdido;}
+    if(d.can&&!temRealoc)perdido=d.valorPedido||0;
+    else if(d.pendParcial&&!temRealoc)perdido=Math.max((d.valorPedido||0)-(d.valorEntregue||0),0);
+    if(perdido>0)recPerdidaByLoja[d.loja]=(recPerdidaByLoja[d.loja]||0)+perdido;
   });
-  const recArr=Object.entries(recPerdidaByLoja).map(([l,v])=>({l,v:Math.round(v*100)/100})).sort((a,b)=>b.v-a.v);
+  const recArr=Object.entries(recPerdidaByLoja).map(([l,v])=>({l,v:Math.round(v)})).sort((a,b)=>b.v-a.v);
   const totalRec=recArr.reduce((s,x)=>s+x.v,0);
   const recEl=document.getElementById('receitaPerdidaTotal');
-  if(recEl)recEl.textContent='R$ '+totalRec.toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(recEl)recEl.textContent='R$ '+totalRec.toLocaleString('pt-BR');
   const maxRec=recArr.length?recArr[0].v:1;
   const recList=document.getElementById('receitaPerdidaList');
-  if(recList)recList.innerHTML=recArr.map(x=>`<div class="rrow"><span style="font-size:11px">${x.l}</span><span style="display:flex;align-items:center;gap:6px"><span style="width:100px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.v/maxRec*100,100)}%;background:#E24B4A;border-radius:99px"></span></span><span style="font-weight:600;font-size:11px;color:#a32d2d;min-width:80px;text-align:right">R$ ${x.v.toLocaleString('pt-BR',{minimumFractionDigits:0,maximumFractionDigits:0})}</span></span></div>`).join('');
+  if(recList)recList.innerHTML=recArr.map(x=>`<div class="rrow"><span style="font-size:11px">${x.l}</span><span style="display:flex;align-items:center;gap:6px"><span style="width:90px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.v/maxRec*100,100)}%;background:#E24B4A;border-radius:99px"></span></span><span style="font-weight:600;font-size:11px;color:#a32d2d;min-width:72px;text-align:right">R$ ${x.v.toLocaleString('pt-BR')}</span></span></div>`).join('');
 
   // ---- CUSTO EXTRA FRETE ----
   const FRETE_CUSTO={'SEDEX-2':28,'PAC-1':18,'TOTAL EXPRESS':22,'ENTREGA HOJE!':35,'ENTREGA HOJE':35};
@@ -958,8 +1074,7 @@ function buildAnalyticsCharts(){
   DATA.filter(d=>d.tipo==='REALOCADO'&&d.fat).forEach(d=>{
     const mktKey=normMkt(d.mkt);
     if(!mktKey)return;
-    const isCancelOrigin=vtxCan.has(mktKey);
-    if(!isCancelOrigin){freteExtraByLoja[d.loja]=(freteExtraByLoja[d.loja]||0)+custoFrete(d.frete);}
+    if(!vtxCan.has(mktKey))freteExtraByLoja[d.loja]=(freteExtraByLoja[d.loja]||0)+custoFrete(d.frete);
   });
   const freteArr=Object.entries(freteExtraByLoja).map(([l,v])=>({l,v:Math.round(v)})).sort((a,b)=>b.v-a.v);
   const totalFrete=freteArr.reduce((s,x)=>s+x.v,0);
@@ -967,139 +1082,33 @@ function buildAnalyticsCharts(){
   if(freteEl)freteEl.textContent='R$ '+totalFrete.toLocaleString('pt-BR');
   const maxFrete=freteArr.length?freteArr[0].v:1;
   const freteList=document.getElementById('freteExtraList');
-  if(freteList)freteList.innerHTML=freteArr.map(x=>`<div class="rrow"><span style="font-size:11px">${x.l}</span><span style="display:flex;align-items:center;gap:6px"><span style="width:100px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.v/maxFrete*100,100)}%;background:#E24B4A;border-radius:99px"></span></span><span style="font-weight:600;font-size:11px;color:#a32d2d;min-width:60px;text-align:right">R$ ${x.v.toLocaleString('pt-BR')}</span></span></div>`).join('');
+  if(freteList)freteList.innerHTML=freteArr.map(x=>`<div class="rrow"><span style="font-size:11px">${x.l}</span><span style="display:flex;align-items:center;gap:6px"><span style="width:90px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.v/maxFrete*100,100)}%;background:#E24B4A;border-radius:99px"></span></span><span style="font-weight:600;font-size:11px;color:#a32d2d;min-width:60px;text-align:right">R$ ${x.v.toLocaleString('pt-BR')}</span></span></div>`).join('');
 
-  // ---- FRETE VS TEMPO ----
-  const freteStats={};
-  DATA.filter(d=>d.fat&&d.hf!==null&&d.frete).forEach(d=>{
-    const f=String(d.frete).trim();
-    let grp=f;
-    if(f.toUpperCase().includes('RETIRADA'))grp='Retirada Loja';
-    else if(f.toUpperCase().includes('LOGGI'))grp='LOGGI';
-    else if(f.toUpperCase().includes('RETIRADA HOJE'))grp='Retirada Hoje!';
-    if(!freteStats[grp])freteStats[grp]={hfs:[],n:0};
-    freteStats[grp].hfs.push(d.hf);freteStats[grp].n++;
-  });
-  const freteArr2=Object.entries(freteStats).filter(([,v])=>v.n>=5).map(([f,v])=>({f,n:v.n,media:Math.round(v.hfs.reduce((a,b)=>a+b,0)/v.n*10)/10,prazo:Math.round(v.hfs.filter(h=>h<=24).length/v.n*100)})).sort((a,b)=>a.media-b.media);
-  const freteCanvas=document.getElementById('freteChart');
-  if(freteCanvas){const ex=Chart.getChart(freteCanvas);if(ex)ex.destroy();
-    new Chart(freteCanvas,{type:'bar',data:{labels:freteArr2.map(f=>f.f),datasets:[{label:'Tempo médio (h)',data:freteArr2.map(f=>f.media),backgroundColor:freteArr2.map(f=>f.prazo>=80?'#4CAF50':f.prazo>=70?'#F5A623':'#E24B4A'),borderRadius:4,yAxisID:'y'},{label:'% no prazo',data:freteArr2.map(f=>f.prazo),type:'line',borderColor:'#185FA5',backgroundColor:'transparent',borderWidth:2,pointRadius:4,yAxisID:'y2'}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>i.datasetIndex===0?` Tempo médio: ${i.raw}h (n=${freteArr2[i.dataIndex].n})`:`% no prazo: ${i.raw}%`}}},scales:{x:{grid:{display:false},ticks:{font:{size:10},color:'#888780',maxRotation:30}},y:{position:'left',grid:{color:'rgba(0,0,0,0.04)'},ticks:{font:{size:10},color:'#888780',callback:v=>v+'h'},title:{display:true,text:'Horas',font:{size:10},color:'#888780'}},y2:{position:'right',min:0,max:100,grid:{display:false},ticks:{font:{size:10},color:'#185FA5',callback:v=>v+'%'},title:{display:true,text:'% Prazo',font:{size:10},color:'#185FA5'}}}}});
-  }
-
-  // ---- V1: faturados >24h — VTX vs Realocados ----
+  // ---- V1 ----
   const fat24=DATA.filter(d=>d.fat&&d.hf!==null&&d.hf>24);
   const fat24real=fat24.filter(d=>d.tipo==='REALOCADO').length;
   const fat24vtx=fat24.filter(d=>d.tipo==='VTX').length;
   const v1Canvas=document.getElementById('v1Chart');
   if(v1Canvas){const ex=Chart.getChart(v1Canvas);if(ex)ex.destroy();
-    new Chart(v1Canvas,{type:'doughnut',data:{labels:['VTX originais','Realocados (000...)'],datasets:[{data:[fat24vtx,fat24real],backgroundColor:['#d3d1c7','#854F0B'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/Math.max(fat24.length,1)*100)}%)`}}}}});
+    new Chart(v1Canvas,{type:'doughnut',data:{labels:['VTX originais','Realocados (000...)'],datasets:[{data:[fat24vtx,fat24real],backgroundColor:['#d3d1c7','#854F0B'],borderWidth:0,datalabels:{display:false}}]},options:{responsive:true,maintainAspectRatio:false,cutout:'65%',plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/Math.max(fat24.length,1)*100)}%)`}}}}});
   }
   const v1s=document.getElementById('v1Summary');
   if(v1s)v1s.innerHTML=`<div style="display:flex;justify-content:space-between"><span style="color:#888780">Total faturados >24h</span><span style="font-weight:600">${fat24.length}</span></div><div style="display:flex;justify-content:space-between"><span style="color:#888780">→ VTX originais</span><span>${fat24vtx} (${Math.round(fat24vtx/Math.max(fat24.length,1)*100)}%)</span></div><div style="display:flex;justify-content:space-between"><span style="color:#854f0b">→ Realocados</span><span style="font-weight:600;color:#854f0b">${fat24real} (${Math.round(fat24real/Math.max(fat24.length,1)*100)}%)</span></div>`;
 
-  // ---- V2: desfecho dos realocados ----
+  // ---- V2 ----
   const allReal=DATA.filter(d=>d.tipo==='REALOCADO');
   const realFatRows=allReal.filter(d=>d.fat&&d.hf!==null);
-  const rP=realFatRows.filter(d=>d.hf<=24).length;
-  const rR=realFatRows.filter(d=>d.hf>24&&d.hf<=48).length;
-  const rA=realFatRows.filter(d=>d.hf>48).length;
-  const rC=allReal.filter(d=>d.can).length;
-  const rAF=allReal.filter(d=>!d.fat&&!d.can).length;
+  const rP=realFatRows.filter(d=>d.hf<=24).length,rR=realFatRows.filter(d=>d.hf>24&&d.hf<=48).length,rA=realFatRows.filter(d=>d.hf>48).length;
+  const rC=allReal.filter(d=>d.can).length,rAF=allReal.filter(d=>!d.fat&&!d.can).length;
   const v2Canvas=document.getElementById('v2Chart');
   if(v2Canvas){const ex=Chart.getChart(v2Canvas);if(ex)ex.destroy();
-    new Chart(v2Canvas,{type:'doughnut',data:{labels:['No prazo ≤24h','Risco 24–48h','Atrasou >48h','Cancelado','A faturar'],datasets:[{data:[rP,rR,rA,rC,rAF],backgroundColor:['#4CAF50','#F5A623','#E24B4A','#d3d1c7','#b5b3ac'],borderWidth:0}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/Math.max(allReal.length,1)*100)}%)`}}}}});
+    new Chart(v2Canvas,{type:'doughnut',data:{labels:['No prazo ≤24h','Risco 24–48h','Atrasou >48h','Cancelado','A faturar'],datasets:[{data:[rP,rR,rA,rC,rAF],backgroundColor:['#4CAF50','#F5A623','#E24B4A','#d3d1c7','#b5b3ac'],borderWidth:0,datalabels:{display:false}}]},options:{responsive:true,maintainAspectRatio:false,cutout:'60%',plugins:{legend:{display:false},datalabels:{},tooltip:{callbacks:{label:i=>`${i.label}: ${i.raw} (${Math.round(i.raw/Math.max(allReal.length,1)*100)}%)`}}}}});
   }
   const v2s=document.getElementById('v2Summary');
   if(v2s)v2s.innerHTML=[['#27500a','No prazo ≤24h',rP],['#854f0b','Risco 24–48h',rR],['#a32d2d','Atrasou >48h',rA],['#888780','Cancelado',rC],['#888780','A faturar',rAF]].map(([c,l,v])=>`<div style="display:flex;justify-content:space-between"><span style="color:${c}">${l}</span><span style="font-weight:600;color:${c}">${v} (${Math.round(v/Math.max(allReal.length,1)*100)}%)</span></div>`).join('');
 }
 
 
-function copyWADirect(loja){
-  const msg=buildWAMsg(loja);
-  const btn=event.currentTarget;
-  navigator.clipboard.writeText(msg).then(()=>{
-    btn.style.color='#1a1a18';
-    btn.title='✓ Copiado!';
-    setTimeout(()=>{btn.style.color='#25D366';btn.title='Copiar mensagem WhatsApp';},2000);
-  }).catch(()=>{
-    const ta=document.createElement('textarea');
-    ta.value=msg;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');
-    document.body.removeChild(ta);
-    btn.style.color='#1a1a18';
-    setTimeout(()=>{btn.style.color='#25D366';},2000);
-  });
-}
-function closeWA(){
-  document.getElementById('waModal').style.display='none';
-  document.getElementById('waCopyBtn').textContent='Copiar mensagem';
-}
-function copyWA(){
-  const txt=document.getElementById('waMsg').textContent;
-  navigator.clipboard.writeText(txt).then(()=>{
-    const btn=document.getElementById('waCopyBtn');
-    btn.textContent='✓ Copiado!';
-    setTimeout(()=>{btn.textContent='Copiar mensagem';},2000);
-  }).catch(()=>{
-    // fallback
-    const ta=document.createElement('textarea');
-    ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
-    document.body.appendChild(ta);ta.select();document.execCommand('copy');
-    document.body.removeChild(ta);
-    const btn=document.getElementById('waCopyBtn');
-    btn.textContent='✓ Copiado!';
-    setTimeout(()=>{btn.textContent='Copiar mensagem';},2000);
-  });
-}
-document.getElementById('waModal').addEventListener('click',function(e){
-  if(e.target===this)closeWA();
-});
-
-function buildWAMsg(loja){
-  const now=new Date();
-  const dataHora=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear()+
-    ' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
-
-  const gLoja=DATA.filter(d=>d.loja===loja);
-  const afaturar=gLoja.filter(d=>!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
-  const crit=afaturar.filter(d=>d.aging>48).length;
-  const alrt=afaturar.filter(d=>d.aging>=24&&d.aging<=48).length;
-
-  const fatG=gLoja.filter(d=>d.fat&&d.hf!==null);
-  const now7=new Date(LOAD_TIME.getTime()-7*86400000);
-  const sem7=fatG.filter(d=>d.dtN&&d.dtN>=now7);
-  const medH=sem7.length>=3?sem7.reduce((s,d)=>s+d.hf,0)/sem7.length:(fatG.length?fatG.reduce((s,d)=>s+d.hf,0)/fatG.length:null);
-  const prazo=Math.round(fatG.filter(d=>d.hf<=24).length/Math.max(fatG.length,1)*100);
-
-  const trat=gLoja.filter(d=>d.fat||d.can);
-  const pend=gLoja.filter(d=>d.pend);
-  const pctP=trat.length?Math.round(pend.length/trat.length*1000)/10:0;
-
-  // Pedidos pendentes (max 10)
-  const pedidosLines=afaturar.slice(0,10).map(r=>{
-    const entrega=r.dtD?'Entrega até '+String(r.dtD.getDate()).padStart(2,'0')+'/'+String(r.dtD.getMonth()+1).padStart(2,'0'):'';
-    const aging=r.aging!==null?fmtH(r.aging):'';
-    const parts=[r.pedido,r.cliente,r.frete,aging,entrega].filter(Boolean);
-    return '• '+parts.join(' — ');
-  }).join('\n');
-
-  let msg='📦 *Loja 3 — '+loja+'*\n';
-  msg+='📅 '+dataHora+'\n\n';
-  msg+='*Pedidos a faturar:* '+afaturar.length+'\n';
-  if(crit>0)msg+='⚠️ Críticos (>48h): '+crit+'\n';
-  if(alrt>0)msg+='🟡 Alerta (24-48h): '+alrt+'\n';
-  msg+='\n';
-  if(medH)msg+='*Tempo médio fat. (7d):* '+fmtH(medH)+'\n';
-  msg+='*SLA:* '+prazo+'% no prazo\n';
-  msg+='*% Pendência:* '+pctP+'%\n';
-  if(pedidosLines){
-    msg+='\n*Pedidos pendentes:*\n';
-    msg+=pedidosLines;
-    if(afaturar.length>10)msg+='\n... e mais '+(afaturar.length-10)+' pedidos';
-  }
-  msg+='\n\n_Dashboard: https://dashboard-faturamento-pedidos.vercel.app/_';
-  return msg;
-}
 function handleFile(e){
   const file=e.target.files[0];if(!file)return;
   const ext=file.name.split('.').pop().toLowerCase();

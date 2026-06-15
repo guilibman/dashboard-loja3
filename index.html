@@ -468,14 +468,14 @@ function processData(rows,filename){
     const dtN=toDateTime(C.nota?r[C.nota]:null)||toDateTime(C.nfdata?r[C.nfdata]:null);
     const dtD=toDateTime(C.entrega?r[C.entrega]:null);
     let hf=null;
-    if(C.hfat&&r[C.hfat])hf=parseHoras(r[C.hfat]);
-    if(hf===null&&fat&&dtE&&dtN){
-      const lojaRow=normLoja(r[C.desc]||'');
-      if(lojaRow==='BENFICA'){
-        hf=horasUteis(dtE,dtN);
-      } else {
-        hf=(dtN-dtE)/3600000;
-      }
+    const _lojaRow=normLoja(r[C.desc]||'');
+    if(_lojaRow==='BENFICA'){
+      // Always use working hours for Benfica (exclude Sat/Sun)
+      if(fat&&dtE&&dtN) hf=horasUteis(dtE,dtN);
+    } else {
+      // Use BC column first, fallback to manual calc
+      if(C.hfat&&r[C.hfat])hf=parseHoras(r[C.hfat]);
+      if(hf===null&&fat&&dtE&&dtN)hf=(dtN-dtE)/3600000;
     }
     const qp=toNum(C.qtdePed?r[C.qtdePed]:0),qe=toNum(C.qtdeEnt?r[C.qtdeEnt]:0);
     const pp=fat&&qp>0&&qe<qp;
@@ -1100,16 +1100,7 @@ function buildAnalyticsCharts(){
   const maxRec=recArr.length?recArr[0].v:1;
   const recList=document.getElementById('receitaPerdidaList');
   const totalPedidosGeral=DATA.filter(d=>d.tipo==='VTX').length||1;
-  if(recList)recList.innerHTML=recArr.map(x=>`<div class="rrow" style="align-items:flex-start;padding:8px 0">
-    <span style="font-size:11px;min-width:120px">${x.l}</span>
-    <span style="display:flex;flex-direction:column;gap:3px;flex:1">
-      <span style="display:flex;align-items:center;gap:6px">
-        <span style="width:90px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.v/maxRec*100,100)}%;background:#E24B4A;border-radius:99px"></span></span>
-        <span style="font-weight:600;font-size:11px;color:#a32d2d;min-width:72px;text-align:right">R$ ${x.v.toLocaleString('pt-BR')}</span>
-      </span>
-      <span style="font-size:10px;color:#aaa">${x.n} pedidos · ${Math.round(x.n/totalPedidosGeral*100*10)/10}% do total</span>
-    </span>
-  </div>`).join('');
+  if(recList)recList.innerHTML=recArr.map(x=>`<div class="rrow"><span style="font-size:11px">${x.l}</span><span style="display:flex;align-items:center;gap:6px"><span style="width:90px;height:4px;background:#f1efe8;border-radius:99px;overflow:hidden;display:inline-block"><span style="display:block;height:100%;width:${Math.min(x.v/maxRec*100,100)}%;background:#E24B4A;border-radius:99px"></span></span><span style="font-weight:600;font-size:11px;color:#a32d2d;min-width:72px;text-align:right">R$ ${x.v.toLocaleString('pt-BR')}</span><span style="font-size:10px;color:#aaa">${x.n}p</span></span></div>`).join('');
 
   // ---- CUSTO EXTRA FRETE ----
   const FRETE_CUSTO={'SEDEX-2':28,'PAC-1':18,'TOTAL EXPRESS':22,'ENTREGA HOJE!':35,'ENTREGA HOJE':35};

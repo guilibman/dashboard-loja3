@@ -1124,6 +1124,117 @@ function handleFile(e){
 }
 
 // ============================================================
+// TABS
+// ============================================================
+function sw(n){
+  const ns=['lojas','pedidos'];
+  document.querySelectorAll('.tab').forEach((t,i)=>t.classList.toggle('on',ns[i]===n));
+  ns.forEach(x=>document.getElementById('tp-'+x).classList.toggle('on',x===n));
+}
+
+// ============================================================
+// PEDIDOS MODE TOGGLE
+// ============================================================
+
+
+// ============================================================
+// WHATSAPP
+// ============================================================
+function openWA(loja){
+  const msg=buildWAMsg(loja);
+  document.getElementById('waModalTitle').textContent='WhatsApp — '+loja;
+  document.getElementById('waMsg').textContent=msg;
+  document.getElementById('waModal').style.display='flex';
+}
+function closeWA(){
+  document.getElementById('waModal').style.display='none';
+  document.getElementById('waCopyBtn').textContent='Copiar mensagem';
+}
+function copyWA(){
+  const txt=document.getElementById('waMsg').textContent;
+  navigator.clipboard.writeText(txt).then(()=>{
+    const btn=document.getElementById('waCopyBtn');
+    btn.textContent='✓ Copiado!';
+    setTimeout(()=>{btn.textContent='Copiar mensagem';},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=txt;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);
+  });
+}
+function copyWADirect(loja){
+  const msg=buildWAMsg(loja);
+  const btn=event.currentTarget;
+  navigator.clipboard.writeText(msg).then(()=>{
+    btn.style.color='#1a1a18';btn.title='✓ Copiado!';
+    setTimeout(()=>{btn.style.color='#aaa';btn.title='Copiar mensagem WhatsApp';},2000);
+  }).catch(()=>{
+    const ta=document.createElement('textarea');
+    ta.value=msg;ta.style.position='fixed';ta.style.opacity='0';
+    document.body.appendChild(ta);ta.select();document.execCommand('copy');
+    document.body.removeChild(ta);
+    btn.style.color='#1a1a18';
+    setTimeout(()=>{btn.style.color='#aaa';},2000);
+  });
+}
+document.addEventListener('DOMContentLoaded',()=>{
+  const modal=document.getElementById('waModal');
+  if(modal)modal.addEventListener('click',function(e){if(e.target===this)closeWA();});
+});
+
+function buildWAMsg(loja){
+  const now=new Date();
+  const dataHora=String(now.getDate()).padStart(2,'0')+'/'+String(now.getMonth()+1).padStart(2,'0')+'/'+now.getFullYear()+' '+String(now.getHours()).padStart(2,'0')+':'+String(now.getMinutes()).padStart(2,'0');
+  const gLoja=DATA.filter(d=>d.loja===loja);
+  const afaturar=gLoja.filter(d=>!d.fat&&!d.can).sort((a,b)=>(b.aging||0)-(a.aging||0));
+  const crit=afaturar.filter(d=>d.aging>48).length;
+  const alrt=afaturar.filter(d=>d.aging>=24&&d.aging<=48).length;
+  const fatG=gLoja.filter(d=>d.fat&&d.hf!==null);
+  const now7=new Date(LOAD_TIME.getTime()-7*86400000);
+  const sem7=fatG.filter(d=>d.dtN&&d.dtN>=now7);
+  const medH=sem7.length>=3?sem7.reduce((s,d)=>s+d.hf,0)/sem7.length:(fatG.length?fatG.reduce((s,d)=>s+d.hf,0)/fatG.length:null);
+  const prazo=Math.round(fatG.filter(d=>d.hf<=24).length/Math.max(fatG.length,1)*100);
+  const trat=gLoja.filter(d=>d.fat||d.can);
+  const pend=gLoja.filter(d=>d.pend);
+  const pctP=trat.length?Math.round(pend.length/trat.length*1000)/10:0;
+  const pedidosLines=afaturar.slice(0,10).map(r=>{
+    const entrega=r.dtD?'Entrega até '+String(r.dtD.getDate()).padStart(2,'0')+'/'+String(r.dtD.getMonth()+1).padStart(2,'0'):'';
+    const aging=r.aging!==null?fmtH(r.aging):'';
+    return '• '+[r.pedido,r.cliente,r.frete,aging,entrega].filter(Boolean).join(' — ');
+  }).join('\n');
+  let msg='📦 *Loja 3 — '+loja+'*\n';
+  msg+='📅 '+dataHora+'\n\n';
+  msg+='*Pedidos a faturar:* '+afaturar.length+'\n';
+  if(crit>0)msg+='⚠️ Críticos (>48h): '+crit+'\n';
+  if(alrt>0)msg+='🟡 Alerta (24-48h): '+alrt+'\n';
+  msg+='\n';
+  if(medH)msg+='*Tempo médio fat. (7d):* '+fmtH(medH)+'\n';
+  msg+='*SLA:* '+prazo+'% no prazo\n';
+  msg+='*% Pendência:* '+pctP+'%\n';
+  if(pedidosLines){msg+='\n*Pedidos pendentes:*\n'+pedidosLines;}
+  if(afaturar.length>10)msg+='\n... e mais '+(afaturar.length-10)+' pedidos';
+  msg+='\n\n_Dashboard: https://dashboard-faturamento-pedidos.vercel.app/_';
+  return msg;
+}
+
+// ============================================================
+// CLEAR DATA
+// ============================================================
+function clearData(){
+  try{localStorage.removeItem(STORAGE_KEY);}catch(e){}
+  DATA=[];pendChart=null;
+  document.getElementById('dash').style.display='none';
+  document.getElementById('loadingBanner').style.display='none';
+  document.getElementById('uploadZone').style.display='block';
+  document.getElementById('savedBanner').style.display='none';
+  document.getElementById('btnClear').style.display='none';
+  document.getElementById('periodo').textContent='—';
+  document.getElementById('subtitle').textContent='Faça upload do CSV/Excel exportado do Millennium';
+}
+
+
+// ============================================================
 // INIT
 // ============================================================
 const zone=document.getElementById('uploadZone');

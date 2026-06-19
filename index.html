@@ -390,6 +390,39 @@ function fmtD(d){if(!d)return'—';return d.toLocaleDateString('pt-BR',{day:'2-d
 function fmtDshort(d){if(!d)return'—';return String(d.getDate()).padStart(2,'0')+'/'+String(d.getMonth()+1).padStart(2,'0');}
 function fmtH(h){if(h===null||h===undefined)return'—';if(h>=24)return Math.floor(h/24)+'d '+Math.round(h%24)+'h';return Math.round(h)+'h';}
 
+// ============================================================
+// DESEMPENHO — score composto (tempo 60% + pendência 40%) com trava de segurança
+// ============================================================
+function tempoScore(h){
+  if(h===null||h===undefined)return null;
+  if(h<=10)return 4;
+  if(h<=20)return 3;
+  if(h<=24)return 2;
+  return 1;
+}
+function pendScore(p){
+  if(p<=3)return 4;
+  if(p<=8)return 3;
+  if(p<=14)return 2;
+  return 1;
+}
+function calcDesempenho(media_h, pct_pend){
+  const ts=tempoScore(media_h);
+  const ps=pendScore(pct_pend);
+  if(ts===null)return{label:'—',cls:'bnt',nota:null};
+  // Trava de segurança: qualquer eixo crítico (score 1) força Atenção
+  if(ts===1||ps===1){
+    return{label:'Atenção',cls:'bdg',nota:ts*0.6+ps*0.4};
+  }
+  const nota=ts*0.6+ps*0.4;
+  let label,cls;
+  if(nota>=3.5){label='Excelente';cls='bok';}
+  else if(nota>=2.5){label='Bom';cls='bok';}
+  else if(nota>=1.5){label='Regular';cls='bwn';}
+  else{label='Atenção';cls='bdg';}
+  return{label,cls,nota};
+}
+
 function horasUteis(dtStart, dtEnd){
   // Calculate working hours excluding Saturday (6) and Sunday (0)
   if(!dtStart||!dtEnd)return null;
@@ -652,8 +685,9 @@ function buildLojaCards(){
   const mn=validH.length?Math.min(...validH):0;
   const mx=validH.length?Math.max(...validH):0;
   el.innerHTML=statsList.map(l=>{
-    const pc=l.pctFat>=93?'bok':l.pctFat>=85?'bwn':'bdg';
-    const lb=l.pctFat>=93?'Bom':l.pctFat>=85?'Regular':'Atenção';
+    const _desemp=calcDesempenho(l.displayH,l.pctP);
+    const pc=_desemp.cls;
+    const lb=_desemp.label;
     const hC=l.displayH&&l.displayH===mn?'#27500a':l.displayH&&l.displayH===mx?'#a32d2d':'#1a1a18';
     const pC=l.pctP>=20?'#a32d2d':l.pctP>=10?'#854f0b':'#888780';
     let trend='';
@@ -734,8 +768,9 @@ function rL(){
     const hC=isFast?'td-h td-fast':isSlow?'td-h td-slow':'td-h';
     const hB=isFast?' <span class="b bok">Mais rápida</span>':isSlow?' <span class="b bdg">Mais lenta</span>':'';
     const fc=l.pct_fat>=93?'#27500a':l.pct_fat>=85?'#854f0b':'#a32d2d';
-    const pc=l.pct_fat>=93?'bok':l.pct_fat>=85?'bwn':'bdg';
-    const lb=l.pct_fat>=93?'Bom':l.pct_fat>=85?'Regular':'Atenção';
+    const _desemp=calcDesempenho(l.media_h,l.pct_pend);
+    const pc=_desemp.cls;
+    const lb=_desemp.label;
     const pC=l.pct_pend>=20?'#a32d2d':l.pct_pend>=10?'#854f0b':'#1a1a18';
     const cs=l.crit>0?` <span class="b bdg">${l.crit} crit.</span>`:'';
     const als=l.alrt>0?` <span class="b bwn">${l.alrt} alrt.</span>`:'';

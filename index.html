@@ -541,15 +541,16 @@ function processData(rows,filename){
     };
   });
 
-  // Resolve Data Aprova for realocados via VTX original mktCore
-  const vtxAprovaMap={};
-  DATA.filter(d=>d.tipo==='VTX'&&d.dtE&&d.vtxNum).forEach(d=>{vtxAprovaMap[d.vtxNum]=d.dtE;});
+  // Resolve Data de Entrega for realocados — must use VTX original's delivery date
+  const vtxEntregaMap={};
+  DATA.filter(d=>d.tipo==='VTX'&&d.dtD&&d.vtxNum).forEach(d=>{vtxEntregaMap[d.vtxNum]=d.dtD;});
   DATA.forEach(d=>{
-    if(d.tipo==='REALOCADO'&&!d.dtE&&d.mktCore&&vtxAprovaMap[d.mktCore]){
-      d.dtE=vtxAprovaMap[d.mktCore];
+    if(d.tipo==='REALOCADO'&&d.mktCore&&vtxEntregaMap[d.mktCore]){
+      d.dtD=vtxEntregaMap[d.mktCore];
     }
   });
-  // Recompute aging after resolving dates
+
+  // Recompute aging
   DATA.forEach(d=>{
     if(!d.fat&&!d.can&&d.dtE) d.aging=(LOAD_TIME-d.dtE)/3600000;
   });

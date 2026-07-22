@@ -51,7 +51,6 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .upload-zone:hover,.upload-zone.drag{border-color:#1a1a18}
 .upload-zone p{font-size:14px;color:#5f5e5a;margin-bottom:4px}
 .upload-zone span{font-size:12px;color:#aaa;display:block;margin-bottom:12px}
-.saved-banner{background:#eaf3de;border:1px solid #c2dba1;border-radius:6px;padding:8px 14px;font-size:12px;color:#27500a;margin-bottom:12px;display:flex;justify-content:space-between;align-items:center;gap:8px;cursor:pointer}
 .td-h{font-weight:700;font-size:13px}.td-fast{color:#27500a}.td-slow{color:#a32d2d}
 .pct-fat{font-weight:700;font-size:13px}
 .af-wrap{display:flex;align-items:center;gap:4px;flex-wrap:wrap;font-size:12px}
@@ -86,7 +85,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
     <p style="font-size:12px;color:#888780;margin-top:2px" id="subtitle">Carregando dados...</p>
   </div>
   <div class="header-right">
-
+    <button class="btn-sm" id="btnUpdate" style="display:none" onclick="document.getElementById('fileInput').click()">Atualizar arquivo</button>
     <button class="btn-sm" id="btnClear" style="display:none" onclick="clearData()">Limpar dados</button>
   </div>
 </div>
@@ -96,10 +95,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
   <p style="font-size:13px;color:#888780">Buscando pedidos.xlsx</p>
 </div>
 
-<div id="savedBanner" class="saved-banner" style="display:none">
-  <span id="savedMsg"></span>
-  <button class="btn-sm" onclick="document.getElementById('fileInput').click();event.stopPropagation()">Atualizar arquivo</button>
-</div>
+
 
 <label class="upload-zone" id="uploadZone" for="fileInput" style="display:none">
   <p>Arraste o arquivo exportado do Millennium aqui</p>
@@ -570,6 +566,7 @@ function renderAll(filename){
   document.getElementById('uploadZone').style.display='none';
   document.getElementById('dash').style.display='block';
   document.getElementById('btnClear').style.display='inline-block';
+  const btnUpd=document.getElementById('btnUpdate');if(btnUpd)btnUpd.style.display='inline-block';
 
   const total=DATA.length,fat=DATA.filter(d=>d.fat).length;
   const pend=DATA.filter(d=>!d.fat&&!d.can).length;
@@ -582,6 +579,31 @@ function renderAll(filename){
   const slaP=Math.round(fatRows.filter(d=>d.hf<=24).length/Math.max(fatRows.length,1)*100);
   const slaR=Math.round(fatRows.filter(d=>d.hf>24&&d.hf<=48).length/Math.max(fatRows.length,1)*100);
   const slaA=Math.round(fatRows.filter(d=>d.hf>48).length/Math.max(fatRows.length,1)*100);
+
+  // Tempo médio geral + tendência
+  const now7g=new Date(LOAD_TIME.getTime()-7*86400000);
+  const now14g=new Date(LOAD_TIME.getTime()-14*86400000);
+  const fatAll=DATA.filter(d=>d.fat&&d.hf!==null);
+  const sem1g=fatAll.filter(d=>d.dtN&&d.dtN>=now7g);
+  const sem2g=fatAll.filter(d=>d.dtN&&d.dtN>=now14g&&d.dtN<now7g);
+  const mediaGeral=fatAll.length?Math.round(fatAll.reduce((s,d)=>s+d.hf,0)/fatAll.length*10)/10:0;
+  const avg1g=sem1g.length>=5?sem1g.reduce((s,d)=>s+d.hf,0)/sem1g.length:null;
+  const avg2g=sem2g.length>=5?sem2g.reduce((s,d)=>s+d.hf,0)/sem2g.length:null;
+  let tendenciaGeral='tempo médio fat.';
+  if(avg1g!==null&&avg2g!==null){
+    const diff=avg1g-avg2g;
+    if(Math.abs(diff)>1){
+      const better=diff<0;
+      tendenciaGeral=(better?'↓':'↑')+fmtH(Math.abs(diff))+' vs 7d ant.';
+    } else {tendenciaGeral='estável vs 7d ant.';}
+  }
+
+  // Pedido mais recente
+  const dtEmissoes=DATA.filter(d=>d.dtE).map(d=>d.dtE.getTime());
+  const dtMaisRecente=dtEmissoes.length?new Date(Math.max(...dtEmissoes)):null;
+  const pedMaisRecente=dtMaisRecente?fmtDT(dtMaisRecente):'—';
+  const subEl=document.getElementById('subtitle');
+  if(subEl)subEl.textContent=DATA.length.toLocaleString('pt-BR')+' pedidos · pedido mais recente: '+pedMaisRecente;
 
   const pendCan=DATA.filter(d=>d.pendCan).length;
   const pendParc=DATA.filter(d=>d.pendParc).length;
@@ -597,7 +619,13 @@ function renderAll(filename){
     </div>
     <div class="mc">
       <div class="ml">Faturados</div>
-      <div class="mv vo">${fat.toLocaleString('pt-BR')}</div>
+      <div style="display:flex;justify-content:space-between;align-items:baseline;gap:8px;margin-bottom:2px">
+        <div class="mv vo">${fat.toLocaleString('pt-BR')}</div>
+        <div style="text-align:right">
+          <div style="font-size:18px;font-weight:700;color:${mediaGeral>24?'#a32d2d':mediaGeral>10?'#854f0b':'#27500a'}">${fmtH(mediaGeral)}</div>
+          <div style="font-size:10px;color:#888780;margin-top:1px">${tendenciaGeral}</div>
+        </div>
+      </div>
       <div style="margin-top:8px;padding-top:8px;border-top:1px solid #f0efe8">
         <div style="width:100%;height:6px;border-radius:99px;overflow:hidden;display:flex;margin-bottom:5px">
           <div style="width:${slaP}%;background:#4CAF50"></div>
@@ -638,10 +666,9 @@ function renderAll(filename){
   if(datas.length){
     const mn=new Date(Math.min(...datas)),mx=new Date(Math.max(...datas));
   
-    document.getElementById('subtitle').textContent=`${total.toLocaleString('pt-BR')} pedidos · ${filename||''}`;
+
   }
-  document.getElementById('savedBanner').style.display='flex';
-  document.getElementById('savedMsg').textContent=`Dados carregados · ${filename||''} · ${new Date().toLocaleString('pt-BR')}`;
+
 
   const lojas=[...new Set(DATA.map(d=>d.loja))].sort();
   const fl=document.getElementById('fL');fl.innerHTML='<option value="">Todas</option>';
@@ -1324,8 +1351,8 @@ function clearData(){
   document.getElementById('dash').style.display='none';
   document.getElementById('loadingBanner').style.display='none';
   document.getElementById('uploadZone').style.display='block';
-  document.getElementById('savedBanner').style.display='none';
   document.getElementById('btnClear').style.display='none';
+  const btnU=document.getElementById('btnUpdate');if(btnU)btnU.style.display='none';
   document.getElementById('subtitle').textContent='Faça upload do CSV/Excel exportado do Millennium';
 }
 
@@ -1358,11 +1385,7 @@ window.addEventListener('load',()=>{
         if(saved){
           const p=JSON.parse(saved);
           if(p&&p.rows&&p.rows.length){
-            const banner=document.getElementById('savedBanner');
-            banner.style.display='flex';
-            document.getElementById('savedMsg').textContent=`Dados salvos encontrados · ${p.filename} · ${new Date(p.savedAt).toLocaleString('pt-BR')} — clique para carregar`;
-            banner.style.cursor='pointer';
-            banner.onclick=()=>{banner.onclick=null;processData(p.rows,p.filename+' (cache)');};
+    
           }
         }
       }catch(e){}

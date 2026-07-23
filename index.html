@@ -718,7 +718,7 @@ function buildLojaCards(){
     const a1=s1.length>=3?s1.reduce((s,d)=>s+d.hf,0)/s1.length:null;
     const a2=s2.length>=3?s2.reduce((s,d)=>s+d.hf,0)/s2.length:null;
     const medH=fg.length?fg.reduce((s,d)=>s+d.hf,0)/fg.length:null;
-    const displayH=a1||medH;
+    const displayH=medH; // Always use overall period average
     if(displayH)validH.push(displayH);
     const prazo=Math.round(fg.filter(d=>d.hf<=24).length/Math.max(fg.length,1)*100);
     const risco=Math.round(fg.filter(d=>d.hf>24&&d.hf<=48).length/Math.max(fg.length,1)*100);
@@ -829,7 +829,7 @@ function rL(){
       const better=l.a1<l.a2;
       trend=`<span style="font-size:11px;margin-left:4px;color:${better?'#27500a':'#a32d2d'}">${better?'↓':'↑'}${fmtH(Math.abs(l.a1-l.a2))}</span>`;
     }
-    const mediaStr=l.a1!==null?`<strong>${fmtH(l.a1)}</strong>${trend}`:(l.media_h!==null?fmtH(l.media_h):'—');
+    const mediaStr=l.media_h!==null?`<strong>${fmtH(l.media_h)}</strong>${trend}`:'—';
     const slaBar=`<div style="display:flex;align-items:center;gap:6px">
       <div style="width:70px;height:8px;border-radius:99px;overflow:hidden;display:flex;flex-shrink:0" title="No prazo: ${l.sla_prazo}% · Risco: ${l.sla_risco}% · Atrasou: ${l.sla_atrasou}%">
         <div style="width:${l.sla_prazo}%;background:#4CAF50"></div>

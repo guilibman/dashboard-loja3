@@ -534,6 +534,7 @@ function processData(rows,filename){
         const mkt=C.mkt?String(r[C.mkt]||'').trim():'';
         return(mkt&&mkt!=='nan'&&mkt.toUpperCase().startsWith('SLR-'))?mkt:'';
       })(),
+      obs:C.obs?String(r[C.obs]||'').trim():'',
       cliente:C.cliente?fmtCliente(r[C.cliente]):'—',
       frete:C.frete?String(r[C.frete]||'').trim():'',
       valorPedido:(()=>{const c=Object.keys(r).find(k=>k.toLowerCase().includes('total pedido'));return c?parseFloat(String(r[c]).replace(',','.'))||0:0;})(),
@@ -549,6 +550,34 @@ function processData(rows,filename){
   DATA.forEach(d=>{
     if(d.tipo==='REALOCADO'&&d.mktCore&&vtxEntregaMap[d.mktCore]){
       d.dtD=vtxEntregaMap[d.mktCore];
+    }
+  });
+
+  // ============================================================
+  // Resolve Pendência Parcial — Situação 1
+  // VTX faturado com realocado gerado via divergência automática
+  // ============================================================
+  function normMktKey(mkt){
+    if(!mkt)return null;
+    // Remove SLR- prefix and normalize
+    const s=String(mkt).trim().replace(/^SLR-/i,'');
+    const m=s.match(/(\d{10,})/);
+    return m?m[1]:null;
+  }
+  // Collect mkt keys of realocados with divergencia obs
+  const divRealocMkts=new Set(
+    DATA.filter(d=>d.tipo==='REALOCADO'&&d.obs&&d.obs.toLowerCase().includes('divergenci'))
+        .map(d=>normMktKey(d.mkt))
+        .filter(Boolean)
+  );
+  // Mark VTX originals as pendParc if they have a divergencia realocado
+  DATA.forEach(d=>{
+    if(d.tipo==='VTX'&&d.fat){
+      const key=normMktKey(d.mkt);
+      if(key&&divRealocMkts.has(key)){
+        d.pendParc=true;
+        d.pend=true;
+      }
     }
   });
 

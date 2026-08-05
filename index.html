@@ -559,10 +559,8 @@ function processData(rows,filename){
   // ============================================================
   function normMktKey(mkt){
     if(!mkt)return null;
-    // Remove SLR- prefix and normalize
-    const s=String(mkt).trim().replace(/^SLR-/i,'');
-    const m=s.match(/(\d{10,})/);
-    return m?m[1]:null;
+    // Keep full value including suffix (-01, -02, etc.) — only normalize case and trim
+    return String(mkt).trim().toUpperCase().replace(/^SLR-/i,'SLR-');
   }
   // Collect mkt keys of realocados with divergencia obs
   const divRealocMkts=new Set(
@@ -876,7 +874,7 @@ function rL(){
       <td>${slaBar}</td>
       <td style="line-height:1.3">
         <span style="font-weight:500;color:${pC}">${l.pct_pend>0?l.pct_pend+'%':'—'}</span>
-        ${l.nPend>0?`<br><span style="font-size:10px;color:#aaa">${l.nPend} pend${l.mediaHParciais!==null?' · '+fmtH(l.mediaHParciais)+' parc.':''}</span>`:''}
+        ${l.nPend>0?`<br><span style="font-size:10px;color:#aaa">${l.nPend} pend</span>`:''}
       </td>
       <td><span class="b ${pc}">${lb}</span></td>
     </tr>`;

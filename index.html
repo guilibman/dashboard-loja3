@@ -30,11 +30,11 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .tab.on{color:#1a1a18;border-bottom-color:#1a1a18;font-weight:500}
 .tp{display:none}.tp.on{display:block}
 .tw{overflow-x:auto;border:1px solid #e5e4e0;border-radius:8px;background:#fff}
-table{width:100%;font-size:12px;border-collapse:collapse}
-th{font-size:11px;font-weight:500;color:#888780;text-align:left;padding:8px 10px;border-bottom:1px solid #e5e4e0;background:#fafaf8;white-space:nowrap;cursor:pointer}
+table{width:100%;font-size:11px;border-collapse:collapse}
+th{font-size:10px;font-weight:500;color:#888780;text-align:left;padding:6px 8px;border-bottom:1px solid #e5e4e0;background:#fafaf8;white-space:nowrap;cursor:pointer}
 th:hover{color:#1a1a18}
 th.sa::after{content:" ↑";opacity:.5}th.sd::after{content:" ↓";opacity:.5}
-td{padding:7px 10px;border-bottom:1px solid #f0efe8;color:#1a1a18;vertical-align:middle}
+td{padding:6px 8px;border-bottom:1px solid #f0efe8;color:#1a1a18;vertical-align:middle}
 tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
 .b{display:inline-block;font-size:11px;font-weight:500;padding:2px 8px;border-radius:99px;white-space:nowrap}
 .bok{background:#D6EBBC;color:#27500A}.bbom{background:#ECF5E1;color:#497829}.bwn{background:#faeeda;color:#633806}.bdg{background:#fcebeb;color:#791f1f}
@@ -254,7 +254,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       <button class="atg" onclick="setAging('o')">OK &lt;24h</button>
     </div>
     <div class="tw"><table>
-      <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Prazo entrega</th><th>Aging</th><th>Situação</th></tr></thead>
+      <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Aprovação</th><th>Prazo entrega</th><th>Aging</th><th>Situação</th></tr></thead>
       <tbody id="ftb"></tbody>
     </table></div>
     <div id="fem" class="empty" style="display:none">Sem pedidos com estes filtros.</div>
@@ -278,7 +278,7 @@ tr:last-child td{border-bottom:none}tr:hover td{background:#fafaf8}
       </select>
     </div>
     <div class="tw"><table>
-      <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Faturado em</th><th>Tempo fat.</th><th>SLA</th></tr></thead>
+      <thead><tr><th>Pedido</th><th>Nº SLR</th><th>Cliente</th><th>Tipo</th><th>Loja</th><th>Status</th><th>Tipo frete</th><th>Emissão</th><th>Aprovação</th><th>Faturado em</th><th>Tempo fat.</th><th>SLA</th></tr></thead>
       <tbody id="fatTb"></tbody>
     </table></div>
     <div id="fatEm" class="empty" style="display:none">Sem pedidos com estes filtros.</div>
@@ -484,6 +484,7 @@ function processData(rows,filename){
     cancel:findCol(keys,['Cancelado'])||'Cancelado',
     obs:findCol(keys,['Obs'])||'Obs',
     mkt:findCol(keys,['Pedido Marketplace'])||'Pedido Marketplace',
+    emis:findCol(keys,['data de emissão','data de emissao','data emissão','data emissao']),
     digit:findCol(keys,['data digitação','data digitacao']),
     aprova:findCol(keys,['data aprova']),
     emis:findCol(keys,['data de emissão','data de emissao']),
@@ -506,7 +507,8 @@ function processData(rows,filename){
     const fat=isFat(status)||_hasNota;
     const can=isCan(r[C.cancel]||'');
     const mkt=String(r[C.mkt]||'').trim();
-    const dtE=toDateTime(C.aprova?r[C.aprova]:null)||toDateTime(C.digit?r[C.digit]:null)||toDateTime(C.emis?r[C.emis]:null);
+    const dtEmis=toDateTime(C.emis?r[C.emis]:null); // Data de Emissão (col B)
+    const dtE=toDateTime(C.aprova?r[C.aprova]:null)||toDateTime(C.digit?r[C.digit]:null)||dtEmis;
     const dtN=toDateTime(C.nota?r[C.nota]:null)||toDateTime(C.nfdata?r[C.nfdata]:null);
     const dtD=toDateTime(C.entrega?r[C.entrega]:null);
     let hf=null;
@@ -526,7 +528,7 @@ function processData(rows,filename){
       pedido,tipo:pedido.startsWith('VTX')?'VTX':'REALOCADO',
       loja:normLoja(r[C.desc]||''),status,fat,can,mkt,
       pend:can||(fat&&pp),pendCan:can,pendParc:fat&&pp,
-      dtE,dtN,dtD,hf,aging,
+      dtE,dtN,dtD,dtEmis,hf,aging,
       slr:(()=>{
         const s=C.slr?String(r[C.slr]||'').trim():'';
         if(s&&s!=='nan')return s;
@@ -916,8 +918,9 @@ function rF(){
       <td>${r.tipo==='REALOCADO'?'<span class="b bpp">Realocado</span>':'<span class="b bnt">VTX</span>'}</td>
       <td>${r.loja}</td><td>${sb(r.status)}</td>
       <td style="font-size:11px;color:#888780">${r.frete||'—'}</td>
-      <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtE)}</td>
-      <td style="color:#888780">${fmtD(r.dtD)}${pvBadge}</td>
+      <td style="color:#888780;white-space:nowrap;font-size:11px">${r.dtEmis?fmtDshort(r.dtEmis):'—'}</td>
+      <td style="color:#888780;white-space:nowrap;font-size:11px">${fmtDT(r.dtE)}</td>
+      <td style="color:#888780;font-size:11px">${fmtD(r.dtD)}${pvBadge}</td>
       <td><span class="b ${ac(r.aging||0)}">${r.aging!==null?fmtH(r.aging):'—'}</span></td>
       <td>${as2(r.aging||0)}</td>
     </tr>`;
@@ -957,8 +960,9 @@ function rFat(){
     <td>${r.tipo==='REALOCADO'?'<span class="b bpp">Realocado</span>':'<span class="b bnt">VTX</span>'}</td>
     <td>${r.loja}</td><td>${sb(r.status)}</td>
     <td style="font-size:11px;color:#888780">${r.frete||'—'}</td>
-    <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtE)}</td>
-    <td style="color:#888780;white-space:nowrap">${fmtDT(r.dtN)}</td>
+    <td style="color:#888780;white-space:nowrap;font-size:11px">${r.dtEmis?fmtDshort(r.dtEmis):'—'}</td>
+    <td style="color:#888780;white-space:nowrap;font-size:11px">${fmtDT(r.dtE)}</td>
+    <td style="color:#888780;white-space:nowrap;font-size:11px">${fmtDT(r.dtN)}</td>
     <td><span style="font-weight:600;color:${hColor(r.hf)}">${fmtH(r.hf)}</span></td>
     <td>${slaBadge(r.hf)}</td>
   </tr>`).join('');
